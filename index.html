@@ -3,7 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Evan Visions — Vidéaste à Lyon</title>
+<title>Evan Visions — Vidéaste à Lyon | Création Vidéo Professionnelle</title>
+<meta name="description" content="Evan Visions, vidéaste professionnel basé à Lyon. Création de vidéos sur mesure pour entreprises et marques : captation, animation, storytelling. Devis gratuit.">
+<meta name="keywords" content="vidéaste Lyon, création vidéo Lyon, vidéo entreprise Lyon, vidéaste professionnel, production vidéo Lyon, film corporate Lyon, captation vidéo, motion design Lyon, vidéo publicitaire, contenu vidéo réseaux sociaux, storytelling vidéo, Evan Visions">
+<meta name="author" content="Evan Visions">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Evan Visions — Vidéaste Professionnel à Lyon">
+<meta property="og:description" content="Création de vidéos sur mesure pour entreprises et marques. Captation, animation, storytelling. Basé à Lyon, disponible partout en France.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://evanvisions.fr">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Evan Visions — Vidéaste Professionnel à Lyon">
+<meta name="twitter:description" content="Création de vidéos sur mesure pour entreprises et marques. Captation, animation, storytelling.">
+<link rel="canonical" href="https://evanvisions.fr">
+<link href="https://fonts.googleapis.com/css2?family=Questrial&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -11,7 +25,7 @@
   --accent:#d4a853;--accent2:#e8c36a;--accent-glow:rgba(212,168,83,0.15);
   --white:#f4f4f8;--gray1:#c8c8d4;--gray2:#8888a0;--gray3:#55556a;--gray4:#2a2a38;
   --border:rgba(255,255,255,0.06);--radius:20px;
-  --font:'Century Gothic','CenturyGothic','AppleGothic','Futura',sans-serif;
+  --font:'Questrial','Century Gothic','CenturyGothic','AppleGothic','Futura',sans-serif;
 }
 html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
 body{background:var(--bg);color:var(--white);font-family:var(--font);overflow-x:hidden;line-height:1.6}
@@ -45,9 +59,10 @@ nav.scrolled{background:rgba(6,6,8,0.88);box-shadow:0 1px 40px rgba(0,0,0,0.4)}
 .hero-enter-1{animation-delay:0.2s}.hero-enter-2{animation-delay:0.5s}
 @keyframes heroIn{to{opacity:1;transform:translateY(0)}}
 
-#trust{padding:50px 0;max-width:100%;overflow:hidden}
+#trust{padding:50px 0;overflow:hidden}
+.trust-inner{max-width:1100px;margin:0 auto;padding:0 40px}
 .marquee-wrap{position:relative;width:100%;overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 8%,black 92%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,black 8%,black 92%,transparent)}
-.marquee-track{display:flex;align-items:center;gap:80px;width:max-content;animation:marquee 30s linear infinite}
+.marquee-track{display:flex;align-items:center;gap:80px;width:max-content;animation:marquee 60s linear infinite}
 .marquee-track img{height:90px;width:auto;object-fit:contain;opacity:0.8}
 @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
@@ -121,6 +136,7 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
   nav{padding:0 20px}.nav-center{display:none}.hamburger{display:flex}
   .nav-center.open{display:flex;flex-direction:column;position:absolute;top:100%;left:0;right:0;background:rgba(6,6,8,0.95);backdrop-filter:blur(30px);padding:24px;border-bottom:1px solid var(--border);gap:14px}
   .section,.cta-section{padding-left:20px;padding-right:20px}
+  .trust-inner{padding:0 20px}
   .ally-card{grid-template-columns:1fr}.ally-img{min-height:240px}.ally-content{padding:30px 24px}
   .presta-grid{grid-template-columns:1fr}.svc-grid{grid-template-columns:1fr}
   .cta-card{padding:50px 24px}
@@ -153,17 +169,35 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
 
 <!-- ===== TRUST MARQUEE ===== -->
 <section id="trust">
-  <div class="sec-tag reveal" style="padding-left:40px">✦ Ils me font confiance.</div>
+  <div class="trust-inner">
+    <div class="sec-tag reveal">✦ Ils me font confiance.</div>
+  </div>
   <div class="marquee-wrap">
     <div class="marquee-track">
-      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Client 1">
-      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Client 2">
-      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Client 3">
-      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Client 4">
-      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Client 1">
-      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Client 2">
-      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Client 3">
-      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Client 4">
+      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
+      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
+      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
+      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
+      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
+      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
+      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
+      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
+      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
+      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
+      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
+      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
+      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
+      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
+      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
+      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
+      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
+      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
+      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
+      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
+      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
+      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
+      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
+      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
     </div>
   </div>
 </section>
@@ -274,6 +308,60 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
     <a href="https://wa.me/33781325185?text=Bonjour%20Evan%2C%20j%27aimerais%20discuter%20de%20mon%20projet%20vid%C3%A9o%20et%20obtenir%20vos%20conseils%20pour%20avancer.%20%C3%8Ates-vous%20disponible%20%3F" target="_blank" class="btn btn-fill" style="padding:14px 36px;font-size:0.9rem">Prendre Contact →</a>
   </div>
 </section>
+
+<!-- ===== SEO CONTENT ===== -->
+<section class="section" style="padding-top:60px;padding-bottom:40px">
+  <div class="sec-tag reveal">✦ Vidéaste professionnel à Lyon</div>
+  <h2 class="sec-title reveal" style="font-size:1.4rem;margin-bottom:20px">Evan Visions — Votre vidéaste à Lyon pour des contenus qui marquent les esprits</h2>
+  <div class="about-text reveal" style="max-width:800px">
+    <p>Basé à <strong style="color:var(--white)">Lyon</strong>, Evan Visions accompagne les entreprises, marques et entrepreneurs dans la <strong style="color:var(--white)">création de vidéos professionnelles sur mesure</strong>. Spécialisé en captation vidéo, motion design et storytelling, chaque projet est pensé pour maximiser votre visibilité et convertir votre audience en clients.</p>
+    <br>
+    <p>Que vous ayez besoin d'une <strong style="color:var(--white)">vidéo corporate</strong>, d'un <strong style="color:var(--white)">clip publicitaire</strong>, de <strong style="color:var(--white)">contenus pour les réseaux sociaux</strong> ou d'une <strong style="color:var(--white)">vidéo promotionnelle</strong> pour votre activité, Evan Visions vous propose un accompagnement complet : de la stratégie créative au montage final, en passant par le tournage et la post-production.</p>
+    <br>
+    <p>Avec plus de dix ans d'expérience dans l'image et une collaboration avec des clients comme <strong style="color:var(--white)">Capital Club</strong>, <strong style="color:var(--white)">L'Appart Fitness</strong> et <strong style="color:var(--white)">DKS TV</strong>, Evan Visions livre des vidéos performantes qui génèrent de la visibilité et renforcent l'identité de votre marque. Disponible à Lyon, dans toute la région Auvergne-Rhône-Alpes et partout en France.</p>
+  </div>
+</section>
+
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "name": "Evan Visions",
+  "description": "Vidéaste professionnel basé à Lyon. Création de vidéos sur mesure pour entreprises et marques : captation, animation, motion design, storytelling.",
+  "url": "https://evanvisions.fr",
+  "telephone": "+33781325185",
+  "email": "evanvisions@gmail.com",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Lyon",
+    "addressRegion": "Auvergne-Rhône-Alpes",
+    "addressCountry": "FR"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 45.7640,
+    "longitude": 4.8357
+  },
+  "areaServed": [
+    {"@type": "City", "name": "Lyon"},
+    {"@type": "AdministrativeArea", "name": "Auvergne-Rhône-Alpes"},
+    {"@type": "Country", "name": "France"}
+  ],
+  "serviceType": ["Création vidéo", "Captation vidéo", "Motion design", "Film corporate", "Vidéo publicitaire", "Contenu réseaux sociaux", "Storytelling vidéo"],
+  "priceRange": "Sur devis",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5",
+    "reviewCount": "5",
+    "bestRating": "5"
+  },
+  "sameAs": [
+    "https://www.instagram.com/evanvisions",
+    "https://www.linkedin.com/in/evan-schwertfeger-36219a290/"
+  ]
+}
+</script>
 
 <!-- ===== FOOTER ===== -->
 <footer>
