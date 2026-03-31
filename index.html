@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evan Visions — Vidéaste à Lyon</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#060608;--bg2:#0c0c10;--bg3:#111116;--bg4:#18181e;
+  --accent:#d4a853;--accent2:#e8c36a;--accent-glow:rgba(212,168,83,0.15);
+  --white:#f4f4f8;--gray1:#c8c8d4;--gray2:#8888a0;--gray3:#55556a;--gray4:#2a2a38;
+  --border:rgba(255,255,255,0.06);--radius:20px;
+  --font:'Century Gothic','CenturyGothic','AppleGothic','Futura',sans-serif;
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--white);font-family:var(--font);overflow-x:hidden;line-height:1.6}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.018'/%3E%3C/svg%3E");pointer-events:none;z-index:10000}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;background:rgba(6,6,8,0.6);backdrop-filter:blur(30px) saturate(1.6);border-bottom:1px solid var(--border);transition:all 0.4s cubic-bezier(0.16,1,0.3,1)}
+nav.scrolled{background:rgba(6,6,8,0.88);box-shadow:0 1px 40px rgba(0,0,0,0.4)}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:700;font-size:0.95rem;color:var(--white);letter-spacing:0.02em}
+.logo-icon{width:28px;height:28px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.7rem;color:var(--bg)}
+.nav-center{display:flex;gap:26px;align-items:center}
+.nav-center a{color:var(--gray2);text-decoration:none;font-size:0.8rem;font-weight:500;transition:color 0.3s}
+.nav-center a:hover{color:var(--white)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 24px;border-radius:50px;font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.4s cubic-bezier(0.16,1,0.3,1);cursor:pointer;border:none;font-family:var(--font)}
+.btn-fill{background:var(--accent);color:var(--bg);box-shadow:0 4px 20px var(--accent-glow)}
+.btn-fill:hover{transform:translateY(-2px);box-shadow:0 8px 35px rgba(212,168,83,0.35)}
+.btn-ghost{background:transparent;color:var(--white);border:1px solid var(--gray4)}
+.btn-ghost:hover{border-color:var(--gray2);background:rgba(255,255,255,0.03)}
+.btn-full{display:block;width:100%;text-align:center;padding:16px 24px;border-radius:14px;font-size:0.9rem}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:5px}
+.hamburger span{width:20px;height:1.5px;background:var(--white);border-radius:1px;transition:0.3s}
+
+.section{padding:100px 40px;max-width:1100px;margin:0 auto}
+.sec-tag{display:inline-flex;align-items:center;gap:6px;font-size:0.72rem;color:var(--accent2);font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:18px}
+.sec-title{font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:800;line-height:1.12;letter-spacing:-0.02em;margin-bottom:14px}
+.gold{color:var(--accent)}.italic{font-style:italic;color:var(--accent2)}
+
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;padding:120px 40px 80px;overflow:hidden}
+.hero-title{font-size:clamp(1.6rem,4.5vw,2.8rem);font-weight:800;line-height:1.15;letter-spacing:-0.02em;margin-bottom:28px;text-transform:uppercase;max-width:700px}
+.hero-enter{opacity:0;transform:translateY(30px);animation:heroIn 0.9s cubic-bezier(0.16,1,0.3,1) forwards}
+.hero-enter-1{animation-delay:0.2s}.hero-enter-2{animation-delay:0.5s}
+@keyframes heroIn{to{opacity:1;transform:translateY(0)}}
+
+#trust{padding:50px 0;max-width:100%;overflow:hidden}
+.marquee-wrap{position:relative;width:100%;overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 8%,black 92%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,black 8%,black 92%,transparent)}
+.marquee-track{display:flex;align-items:center;gap:80px;width:max-content;animation:marquee 30s linear infinite}
+.marquee-track img{height:90px;width:auto;object-fit:contain;opacity:0.8}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+.about-header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.about-name{font-weight:700;font-size:1.05rem}.about-role{font-size:0.78rem;color:var(--gray2)}
+.about-socials{display:flex;gap:10px;margin:8px 0 22px}
+.about-socials a{width:30px;height:30px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--gray2);text-decoration:none;font-size:0.75rem;transition:all 0.3s}
+.about-socials a:hover{border-color:var(--accent);color:var(--accent)}
+.about-text{font-size:0.92rem;color:var(--gray1);line-height:1.8}
+
+.ally-card{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:24px;margin-top:60px;overflow:hidden;align-items:stretch}
+.ally-img{width:100%;height:100%;min-height:360px;object-fit:cover}
+.ally-content{padding:44px 40px;display:flex;flex-direction:column;justify-content:center}
+.ally-content h3{font-size:1.4rem;font-weight:700;margin-bottom:6px}
+.ally-underline{width:60px;height:2px;background:var(--accent);margin-bottom:18px}
+.ally-content p{font-size:0.86rem;color:var(--gray1);line-height:1.75;margin-bottom:14px}
+
+.presta-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:40px 0 30px}
+.presta-card{border-radius:16px;overflow:hidden;position:relative;aspect-ratio:16/9;background:var(--bg2);transition:transform 0.5s cubic-bezier(0.16,1,0.3,1);cursor:pointer;border:1px solid var(--border)}
+.presta-card:hover{transform:scale(1.02);border-color:rgba(212,168,83,0.2)}
+.presta-card video{width:100%;height:100%;object-fit:cover;display:block}
+
+.avis-marquee-wrap{position:relative;width:100vw;left:50%;transform:translateX(-50%);overflow:hidden;margin-top:40px;mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,black 6%,black 94%,transparent)}
+.avis-marquee-track{display:flex;gap:18px;width:max-content;animation:avisScroll 45s linear infinite}
+.avis-marquee-track:hover{animation-play-state:paused}
+@keyframes avisScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.avis-card{flex:0 0 340px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;transition:all 0.4s cubic-bezier(0.16,1,0.3,1)}
+.avis-card:hover{border-color:rgba(212,168,83,0.2);transform:translateY(-4px)}
+.avis-quote{font-size:0.85rem;color:var(--gray1);line-height:1.7;font-style:italic;margin-bottom:20px}
+.avis-stars{margin-bottom:10px;color:#fbbf24;font-size:0.85rem;letter-spacing:2px}
+.avis-author{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid var(--border)}
+.avis-av{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#e8c36a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:var(--bg)}
+.avis-name{font-weight:600;font-size:0.85rem}.avis-role{font-size:0.72rem;color:var(--gray3)}
+
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:40px}
+.svc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:32px 26px;transition:all 0.5s cubic-bezier(0.16,1,0.3,1);position:relative;overflow:hidden}
+.svc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity 0.5s}
+.svc-card:hover{border-color:rgba(212,168,83,0.2);transform:translateY(-5px)}
+.svc-card:hover::before{opacity:1}
+.svc-icon{width:42px;height:42px;border-radius:12px;background:rgba(212,168,83,0.08);border:1px solid rgba(212,168,83,0.15);display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:16px}
+.svc-card h3{font-size:1.1rem;font-weight:700;margin-bottom:10px}
+.svc-card p{font-size:0.84rem;color:var(--gray2);line-height:1.65}
+.svc-arrow{position:absolute;top:20px;right:20px;color:var(--accent);font-size:1rem;opacity:0;transition:opacity 0.3s}
+.svc-card:hover .svc-arrow{opacity:1}
+
+.faq-list{max-width:700px;margin:40px auto 0;display:flex;flex-direction:column;gap:6px}
+.faq-item{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color 0.3s}
+.faq-item.open{border-color:rgba(212,168,83,0.2)}
+.faq-q{padding:20px 24px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:0.9rem;font-weight:600;transition:color 0.3s;user-select:none}
+.faq-q:hover{color:var(--accent2)}
+.faq-toggle{width:28px;height:28px;border-radius:50%;background:rgba(212,168,83,0.08);border:1px solid rgba(212,168,83,0.15);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--accent);transition:transform 0.4s cubic-bezier(0.16,1,0.3,1);flex-shrink:0}
+.faq-item.open .faq-toggle{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.5s cubic-bezier(0.16,1,0.3,1)}
+.faq-a-inner{padding:0 24px 20px;font-size:0.85rem;color:var(--gray2);line-height:1.7}
+
+.cta-section{padding:80px 40px;max-width:1100px;margin:0 auto;text-align:center}
+.cta-card{background:var(--bg2);border:1px solid var(--border);border-radius:28px;padding:70px 50px;position:relative;overflow:hidden}
+.cta-card::before{content:'';position:absolute;width:500px;height:250px;background:radial-gradient(ellipse,var(--accent-glow) 0%,transparent 70%);top:-130px;left:50%;transform:translateX(-50%);pointer-events:none}
+.cta-title{font-size:clamp(1.4rem,3vw,2rem);font-weight:700;line-height:1.3;margin-bottom:28px}
+
+footer{padding:40px;max-width:1100px;margin:0 auto;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);text-decoration:none;font-size:0.75rem;transition:color 0.3s}footer a:hover{color:var(--accent)}
+
+.reveal{opacity:0;transform:translateY(36px);transition:all 0.8s cubic-bezier(0.16,1,0.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-scale{opacity:0;transform:scale(0.96);transition:all 0.8s cubic-bezier(0.16,1,0.3,1)}
+.reveal-scale.visible{opacity:1;transform:scale(1)}
+.rd1{transition-delay:0.1s}.rd2{transition-delay:0.2s}.rd3{transition-delay:0.3s}.rd4{transition-delay:0.35s}
+
+@media(max-width:900px){
+  nav{padding:0 20px}.nav-center{display:none}.hamburger{display:flex}
+  .nav-center.open{display:flex;flex-direction:column;position:absolute;top:100%;left:0;right:0;background:rgba(6,6,8,0.95);backdrop-filter:blur(30px);padding:24px;border-bottom:1px solid var(--border);gap:14px}
+  .section,.cta-section{padding-left:20px;padding-right:20px}
+  .ally-card{grid-template-columns:1fr}.ally-img{min-height:240px}.ally-content{padding:30px 24px}
+  .presta-grid{grid-template-columns:1fr}.svc-grid{grid-template-columns:1fr}
+  .cta-card{padding:50px 24px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<nav id="navbar">
+  <a href="#hero" class="logo"><div class="logo-icon">EV</div> EVAN VISIONS</a>
+  <div class="nav-center" id="navLinks">
+    <a href="#prestations">Mon travail</a>
+    <a href="#about">À propos de moi</a>
+    <a href="#avis">Avis Client</a>
+    <a href="#services">Services</a>
+    <a href="#faq">FAQ</a>
+    <a href="https://wa.me/33781325185?text=Bonjour%20Evan%2C%20j%27aimerais%20discuter%20de%20mon%20projet%20vid%C3%A9o%20et%20obtenir%20vos%20conseils%20pour%20avancer.%20%C3%8Ates-vous%20disponible%20%3F" target="_blank" class="btn" style="background:#d4a853;color:#060608;font-weight:700">Contact</a>
+  </div>
+  <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section id="hero">
+  <h1 class="hero-title hero-enter hero-enter-1">Votre marque mérite une vidéo <span class="italic">performante.</span></h1>
+  <div class="hero-enter hero-enter-2">
+    <a href="https://wa.me/33781325185?text=Bonjour%20Evan%2C%20j%27aimerais%20discuter%20de%20mon%20projet%20vid%C3%A9o%20et%20obtenir%20vos%20conseils%20pour%20avancer.%20%C3%8Ates-vous%20disponible%20%3F" target="_blank" class="btn btn-fill" style="padding:14px 36px;font-size:0.9rem">Prendre Contact →</a>
+  </div>
+</section>
+
+<!-- ===== TRUST MARQUEE ===== -->
+<section id="trust">
+  <div class="sec-tag reveal" style="padding-left:40px">✦ Ils me font confiance.</div>
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Client 1">
+      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Client 2">
+      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Client 3">
+      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Client 4">
+      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Client 1">
+      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Client 2">
+      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Client 3">
+      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Client 4">
+    </div>
+  </div>
+</section>
+
+<!-- ===== À PROPOS ===== -->
+<section id="about" class="section">
+  <div class="sec-tag reveal">✦ À propos de moi.</div>
+
+  <div class="about-header reveal">
+    <img src="https://framerusercontent.com/images/7ptBDehx24GEi41h4ACFhNe6gb0.jpg?scale-down-to=512&width=1080&height=568" alt="Evan Visions" style="width:50px;height:50px;border-radius:14px;object-fit:cover">
+    <div>
+      <div class="about-name">Evan Visions</div>
+      <div class="about-role">Vidéaste</div>
+    </div>
+  </div>
+
+  <div class="about-socials reveal">
+    <a href="https://www.linkedin.com/in/evan-schwertfeger-36219a290/" target="_blank" title="LinkedIn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+    <a href="https://www.instagram.com/evanvisions" target="_blank" title="Instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
+    <a href="https://wa.me/33781325185?text=Bonjour%20Evan%2C%20j%27aimerais%20discuter%20de%20mon%20projet%20vid%C3%A9o%20et%20obtenir%20vos%20conseils%20pour%20avancer.%20%C3%8Ates-vous%20disponible%20%3F" target="_blank" title="WhatsApp"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+  </div>
+
+  <div class="about-text reveal">
+    <p>Je travaille <span class="italic">avec vous</span> pour <span class="italic">comprendre vos besoins</span> et vos défis, puis je transforme <span class="italic">vos idées en vidéos</span> sur mesure qui captent l'attention et <span class="italic">font la différence.</span></p>
+    <br>
+    <p>Mon objectif : révéler ce qui vous rend unique, <span class="italic">raconter votre histoire</span> avec style et impact, et créer des visuels qui <span class="italic">soutiennent vos ambitions.</span></p>
+    <br>
+    <p>Votre marque mérite d'être vue. <span class="italic">Ensemble,</span> mettons-la au <span class="italic">premier plan.</span></p>
+  </div>
+
+  <!-- ALLY -->
+  <div class="ally-card reveal-scale">
+    <img src="https://framerusercontent.com/images/h3LRsOezrZo6EzTTpAvKAHxVMFo.png?scale-down-to=1024&width=1030&height=568" alt="Evan Visions créatif" class="ally-img">
+    <div class="ally-content">
+      <h3>Votre allié <span class="gold">créatif.</span></h3>
+      <div class="ally-underline"></div>
+      <p>Je suis vidéaste basé à Lyon, spécialisé dans la création de vidéos sur mesure pour les entreprises et les marques. Mon objectif : produire du contenu professionnel et cohérent avec votre image.</p>
+      <p>Curieux de nature et passionné par l'image depuis plus de dix ans, j'accompagne mes clients de la stratégie jusqu'au contenu livrable. Chaque marque a un processus simple, agréable et efficace, tout en garantissant un résultat qui génère de la visibilité et performance.</p>
+      <p>Prêt à donner plus d'impact à votre communication ? Parlons de votre projet.</p>
+      <br>
+      <a href="https://wa.me/33781325185?text=Bonjour%20Evan%2C%20j%27aimerais%20discuter%20de%20mon%20projet%20vid%C3%A9o%20et%20obtenir%20vos%20conseils%20pour%20avancer.%20%C3%8Ates-vous%20disponible%20%3F" target="_blank" class="btn btn-fill" style="text-align:center;justify-content:center">Prendre Contact →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRESTATIONS ===== -->
+<section id="prestations" class="section">
+  <div class="sec-tag reveal">✦ Mon travail.</div>
+  <h2 class="sec-title reveal">Mes prestations.</h2>
+  <div class="presta-grid">
+    <div class="presta-card reveal rd1"><video src="https://framerusercontent.com/assets/LJaPTEb2VMsX5NkyqMFbo4areQ.mp4" autoplay muted loop playsinline></video></div>
+    <div class="presta-card reveal rd2"><video src="https://framerusercontent.com/assets/q3cG9dFtdoMBHgI3nvDDIsgIZzE.mp4" autoplay muted loop playsinline></video></div>
+    <div class="presta-card reveal rd3"><video src="https://framerusercontent.com/assets/bYHC9y6uUibjxDCCoejbrpONgpo.mp4" autoplay muted loop playsinline></video></div>
+    <div class="presta-card reveal rd4"><video src="https://framerusercontent.com/assets/6zy3fAJpudISQNJQLTGaZXMCIEc.mp4" autoplay muted loop playsinline></video></div>
+  </div>
+  <a href="https://docs.google.com/forms/d/e/1FAIpQLSdhWBZhsquzVPc4JkYBK6S5hIZB-ZoZc5EXlW5rJ21CVqTbGg/viewform" target="_blank" class="btn btn-fill btn-full reveal" style="max-width:600px;margin:20px auto 0;display:block;text-align:center">DEMANDE TON DEVIS GRATUIT →</a>
+</section>
+
+<!-- ===== AVIS CLIENT ===== -->
+<section id="avis" class="section">
+  <div class="sec-tag reveal">✦ Avis client.</div>
+  <h2 class="sec-title reveal">Avis client.</h2>
+  <div class="avis-marquee-wrap">
+    <div class="avis-marquee-track">
+      <div class="avis-card"><div class="avis-quote">« Nous avons eu la chance d'être accompagnés par Evan pendant deux jours de tournage. Il nous a marqué par sa capacité à gérer avec efficacité les imprévus. Le résultat final est très professionnel, il nous a même offert de superbes photos. Nous recommandons sans hésitation ! »</div><div class="avis-stars">★★★★★</div><div class="avis-author"><div class="avis-av">CC</div><div><div class="avis-name">Capital Club</div><div class="avis-role">Client</div></div></div></div>
+      <div class="avis-card"><div class="avis-quote">« Qualité des photos au top mais surtout une rapidité sur le montage et l'envoi assez exceptionnelle ! »</div><div class="avis-stars">★★★★★</div><div class="avis-author"><div class="avis-av">RB</div><div><div class="avis-name">Rayane B.</div><div class="avis-role">Client</div></div></div></div>
+      <div class="avis-card"><div class="avis-quote">« Excellente prestation ! Merci encore ! »</div><div class="avis-stars">★★★★★</div><div class="avis-author"><div class="avis-av">DK</div><div><div class="avis-name">DKS TV</div><div class="avis-role">Client</div></div></div></div>
+      <div class="avis-card"><div class="avis-quote">« Incroyable boulot, conforme à mes attentes et du travail sérieux, des retours très fréquents bravo ! »</div><div class="avis-stars">★★★★★</div><div class="avis-author"><div class="avis-av">JM</div><div><div class="avis-name">Julien M.</div><div class="avis-role">Client</div></div></div></div>
+      <div class="avis-card"><div class="avis-quote">« Contenu très qualitatif je recommande ! »</div><div class="avis-stars">★★★★★</div><div class="avis-author"><div class="avis-av">QT</div><div><div class="avis-name">Quentin T.</div><div class="avis-role">Client</div></div></div></div>
+      <!-- Duplicate -->
+      <div class="avis-card"><div class="avis-quote">« Nous avons eu la chance d'être accompagnés par Evan pendant deux jours de tournage. Il nous a marqué par sa capacité à gérer avec efficacité les imprévus. Le résultat final est très professionnel, il nous a même offert de superbes photos. Nous recommandons sans hésitation ! »</div><div class="avis-stars">★★★★★</div><div class="avis-author"><div class="avis-av">CC</div><div><div class="avis-name">Capital Club</div><div class="avis-role">Client</div></div></div></div>
+      <div class="avis-card"><div class="avis-quote">« Qualité des photos au top mais surtout une rapidité sur le montage et l'envoi assez exceptionnelle ! »</div><div class="avis-stars">★★★★★</div><div class="avis-author"><div class="avis-av">RB</div><div><div class="avis-name">Rayane B.</div><div class="avis-role">Client</div></div></div></div>
+      <div class="avis-card"><div class="avis-quote">« Excellente prestation ! Merci encore ! »</div><div class="avis-stars">★★★★★</div><div class="avis-author"><div class="avis-av">DK</div><div><div class="avis-name">DKS TV</div><div class="avis-role">Client</div></div></div></div>
+      <div class="avis-card"><div class="avis-quote">« Incroyable boulot, conforme à mes attentes et du travail sérieux, des retours très fréquents bravo ! »</div><div class="avis-stars">★★★★★</div><div class="avis-author"><div class="avis-av">JM</div><div><div class="avis-name">Julien M.</div><div class="avis-role">Client</div></div></div></div>
+      <div class="avis-card"><div class="avis-quote">« Contenu très qualitatif je recommande ! »</div><div class="avis-stars">★★★★★</div><div class="avis-author"><div class="avis-av">QT</div><div><div class="avis-name">Quentin T.</div><div class="avis-role">Client</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SERVICES ===== -->
+<section id="services" class="section">
+  <div class="sec-tag reveal">✦ Mes services.</div>
+  <h2 class="sec-title reveal">Mes services.</h2>
+  <div class="svc-grid">
+    <div class="svc-card reveal rd1"><div class="svc-icon">🎥</div><h3>Captation</h3><p>Je filme vos projets avec soin et professionnalisme pour créer des vidéos qui captent l'attention et mettent en valeur ce que vous faites de mieux.</p><div class="svc-arrow">→</div></div>
+    <div class="svc-card reveal rd2"><div class="svc-icon">✨</div><h3>Animation</h3><p>Animation et effets sur mesure qui rendent vos vidéos uniques, mémorables et captivantes sur tous vos supports.</p><div class="svc-arrow">→</div></div>
+    <div class="svc-card reveal rd3"><div class="svc-icon">📖</div><h3>Stratégie & Storytelling</h3><p>Chaque vidéo raconte votre histoire de manière authentique, pour que votre message soit compris, apprécié et retenu.</p><div class="svc-arrow">→</div></div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section id="faq" class="section">
+  <div class="sec-tag reveal">✦ FAQ</div>
+  <h2 class="sec-title reveal">FAQ</h2>
+  <div class="faq-list">
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Comment démarrer ?<div class="faq-toggle">+</div></div><div class="faq-a"><div class="faq-a-inner">Tout commence par une discussion pour comprendre vos besoins, votre cible et votre audience. Nous définissons ensemble vos objectifs, vos idées et ce que vous voulez transmettre, avant de passer à la création de votre vidéo sur mesure.</div></div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Quels types de vidéos pouvez-vous réaliser ?<div class="faq-toggle">+</div></div><div class="faq-a"><div class="faq-a-inner">Je crée des vidéos institutionnelles, publicitaires, promotionnelles, pour les réseaux sociaux, des clips artistiques ou sportifs, ainsi que du motion design. Chaque format est adapté à votre besoin et à votre audience.</div></div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Quel est le tarif de vos services ?<div class="faq-toggle">+</div></div><div class="faq-a"><div class="faq-a-inner">Chaque projet est unique et mon tarif s'adapte à vos besoins et à la complexité de votre projet. Je propose des prix clairs et transparents, sans surprises. Proposez un rendez-vous pour discuter de votre projet : je serai ravi de fournir un devis gratuit et personnalisé pour maximiser l'impact de votre vidéo.</div></div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Fournissez-vous les fichiers finaux prêts à l'utilisation ?<div class="faq-toggle">+</div></div><div class="faq-a"><div class="faq-a-inner">Absolument ! Vous recevez les fichiers dans les formats nécessaires et adaptés pour vos supports : réseaux sociaux, site web, diffusion ou projection. Tout est prêt à l'emploi.</div></div></div>
+    <div class="faq-item reveal"><div class="faq-q" onclick="toggleFaq(this)">Comment votre vidéo reflétera-t-elle mon image ?<div class="faq-toggle">+</div></div><div class="faq-a"><div class="faq-a-inner">Je commence toujours par vous écouter et comprendre ce qui fait votre identité. Chaque choix visuel et narratif est pensé pour représenter vos valeurs et créer une vidéo qui vous ressemble vraiment.</div></div></div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section id="cta" class="cta-section">
+  <div class="cta-card reveal-scale">
+    <h2 class="cta-title">Je suis là pour <span class="gold">vous aider</span> à créer quelque chose de<br>performant, <span class="italic">ensemble</span> !</h2>
+    <a href="https://wa.me/33781325185?text=Bonjour%20Evan%2C%20j%27aimerais%20discuter%20de%20mon%20projet%20vid%C3%A9o%20et%20obtenir%20vos%20conseils%20pour%20avancer.%20%C3%8Ates-vous%20disponible%20%3F" target="_blank" class="btn btn-fill" style="padding:14px 36px;font-size:0.9rem">Prendre Contact →</a>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <span>Designed par <strong style="color:var(--white)">Digiora</strong></span>
+  <span>© Evan Visions 2026</span>
+  <a href="#">Hébergé par Framer</a>
+</footer>
+
+<script>
+const obs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting){el.target.classList.add('visible');obs.unobserve(el.target)}})},{threshold:0.1,rootMargin:'0px 0px -30px 0px'});
+document.querySelectorAll('.reveal,.reveal-scale').forEach(el=>obs.observe(el));
+let lastY=0;window.addEventListener('scroll',()=>{const nav=document.getElementById('navbar');const y=window.scrollY;nav.classList.toggle('scrolled',y>50);nav.style.transform=(y>lastY&&y>300)?'translateY(-100%)':'translateY(0)';lastY=y},{passive:true});
+document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{const t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});document.getElementById('navLinks').classList.remove('open')}})});
+function toggleFaq(el){const item=el.parentElement;const ans=item.querySelector('.faq-a');const isOpen=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>{i.classList.remove('open');i.querySelector('.faq-a').style.maxHeight='0'});if(!isOpen){item.classList.add('open');ans.style.maxHeight=ans.scrollHeight+'px'}}
+document.querySelectorAll('.presta-card video').forEach(v=>{v.play().catch(()=>{});const vObs=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting)v.play().catch(()=>{})})},{threshold:0.2});vObs.observe(v)});
+</script>
+</body>
+</html>
