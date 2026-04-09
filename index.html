@@ -168,6 +168,11 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
 .admin-status{font-size:0.78rem;color:var(--gray2);margin-top:12px;text-align:center;min-height:20px}
 .admin-status.success{color:#22c55e}
 .admin-status.error{color:#ef4444}
+.admin-add-btn{width:100%;padding:18px;border-radius:14px;border:2px dashed var(--gray4);background:transparent;color:var(--gray2);font-family:var(--font);font-size:0.88rem;font-weight:600;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:8px}
+.admin-add-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(212,168,83,0.04)}
+.admin-remove-btn{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#ef4444;font-size:0.8rem;transition:all 0.3s;font-family:var(--font)}
+.admin-remove-btn:hover{background:rgba(239,68,68,0.15);border-color:#ef4444}
+.admin-video-item{position:relative}
 </style>
 </head>
 <body>
@@ -417,28 +422,8 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
       <div class="admin-title">🎬 Gestion des vidéos</div>
       <div class="admin-sub">Modifiez les URLs des vidéos de la section prestations. Les changements sont instantanés.</div>
 
-      <div class="admin-grid">
-        <div class="admin-video-item">
-          <div class="admin-video-label">Vidéo 1</div>
-          <input type="text" class="admin-video-input" id="vid1" placeholder="URL de la vidéo 1 (mp4)" oninput="previewVid(1)">
-          <div class="admin-video-preview"><video id="prev1" muted loop playsinline></video></div>
-        </div>
-        <div class="admin-video-item">
-          <div class="admin-video-label">Vidéo 2</div>
-          <input type="text" class="admin-video-input" id="vid2" placeholder="URL de la vidéo 2 (mp4)" oninput="previewVid(2)">
-          <div class="admin-video-preview"><video id="prev2" muted loop playsinline></video></div>
-        </div>
-        <div class="admin-video-item">
-          <div class="admin-video-label">Vidéo 3</div>
-          <input type="text" class="admin-video-input" id="vid3" placeholder="URL de la vidéo 3 (mp4)" oninput="previewVid(3)">
-          <div class="admin-video-preview"><video id="prev3" muted loop playsinline></video></div>
-        </div>
-        <div class="admin-video-item">
-          <div class="admin-video-label">Vidéo 4</div>
-          <input type="text" class="admin-video-input" id="vid4" placeholder="URL de la vidéo 4 (mp4)" oninput="previewVid(4)">
-          <div class="admin-video-preview"><video id="prev4" muted loop playsinline></video></div>
-        </div>
-      </div>
+      <div class="admin-grid" id="adminGrid"></div>
+      <button class="admin-add-btn" onclick="addVideoSlot()">+ Ajouter une vidéo</button>
 
       <div class="admin-save-row">
         <button class="btn btn-fill" style="flex:1" onclick="saveVideos()">💾 Sauvegarder</button>
@@ -485,6 +470,8 @@ const DEFAULT_VIDEOS = [
   "https://framerusercontent.com/assets/6zy3fAJpudISQNJQLTGaZXMCIEc.mp4"
 ];
 
+let videoCount = 0;
+
 // ============================================
 // FIREBASE INIT
 // ============================================
@@ -492,39 +479,113 @@ let db = null;
 let firebaseReady = false;
 
 try {
-  if (firebaseConfig.apiKey !== "REMPLACE-MOI") {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
-    firebaseReady = true;
-  }
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+  firebaseReady = true;
 } catch(e) {
   console.log("Firebase non configuré — utilisation des vidéos par défaut");
 }
 
 // ============================================
-// LOAD VIDEOS FROM FIREBASE
+// DYNAMIC VIDEO SLOTS (DASHBOARD)
+// ============================================
+function createVideoSlot(n, url) {
+  const item = document.createElement('div');
+  item.className = 'admin-video-item';
+  item.id = 'vidItem' + n;
+  item.innerHTML = `
+    <div class="admin-video-label">Vidéo ${n}</div>
+    ${n > 1 ? `<div class="admin-remove-btn" onclick="removeVideoSlot(${n})">✕</div>` : ''}
+    <input type="text" class="admin-video-input" id="vid${n}" placeholder="URL de la vidéo ${n} (mp4)" value="${url || ''}" oninput="previewVid(${n})">
+    <div class="admin-video-preview"><video id="prev${n}" muted loop playsinline></video></div>
+  `;
+  document.getElementById('adminGrid').appendChild(item);
+  if (url) { setTimeout(() => previewVid(n), 100); }
+  videoCount = Math.max(videoCount, n);
+}
+
+function addVideoSlot(url) {
+  videoCount++;
+  createVideoSlot(videoCount, url || '');
+  const input = document.getElementById('vid' + videoCount);
+  if (!url) input.focus();
+}
+
+function removeVideoSlot(n) {
+  const item = document.getElementById('vidItem' + n);
+  if (item) {
+    item.style.transition = 'all 0.3s';
+    item.style.opacity = '0';
+    item.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      item.remove();
+      renumberSlots();
+    }, 300);
+  }
+}
+
+function renumberSlots() {
+  const items = document.querySelectorAll('#adminGrid .admin-video-item');
+  videoCount = 0;
+  items.forEach((item, i) => {
+    const n = i + 1;
+    videoCount = n;
+    item.id = 'vidItem' + n;
+    item.querySelector('.admin-video-label').textContent = 'Vidéo ' + n;
+    const input = item.querySelector('.admin-video-input');
+    input.id = 'vid' + n;
+    input.setAttribute('oninput', `previewVid(${n})`);
+    input.placeholder = `URL de la vidéo ${n} (mp4)`;
+    const prev = item.querySelector('video');
+    prev.id = 'prev' + n;
+    const removeBtn = item.querySelector('.admin-remove-btn');
+    if (n === 1) { if (removeBtn) removeBtn.remove(); }
+    else if (removeBtn) { removeBtn.setAttribute('onclick', `removeVideoSlot(${n})`); }
+    else {
+      const btn = document.createElement('div');
+      btn.className = 'admin-remove-btn';
+      btn.setAttribute('onclick', `removeVideoSlot(${n})`);
+      btn.textContent = '✕';
+      item.appendChild(btn);
+    }
+  });
+}
+
+// ============================================
+// LOAD VIDEOS FROM FIREBASE → SITE + DASHBOARD
 // ============================================
 function loadVideos() {
-  const videos = document.querySelectorAll('.presta-card video');
   if (!firebaseReady || !db) {
-    // Pas de Firebase = on garde les vidéos par défaut
-    videos.forEach(v => { v.play().catch(()=>{}); });
+    renderSiteVideos(DEFAULT_VIDEOS);
     return;
   }
-
   db.ref('videos').once('value').then(snap => {
     const data = snap.val();
-    if (data) {
-      videos.forEach((v, i) => {
-        const url = data['video' + (i+1)] || DEFAULT_VIDEOS[i];
-        if (v.src !== url) { v.src = url; }
-        v.play().catch(()=>{});
-      });
+    if (data && data.urls && data.urls.length) {
+      renderSiteVideos(data.urls);
     } else {
-      videos.forEach(v => v.play().catch(()=>{}));
+      renderSiteVideos(DEFAULT_VIDEOS);
     }
-  }).catch(() => {
-    videos.forEach(v => v.play().catch(()=>{}));
+  }).catch(() => renderSiteVideos(DEFAULT_VIDEOS));
+}
+
+function renderSiteVideos(urls) {
+  const grid = document.querySelector('.presta-grid');
+  grid.innerHTML = '';
+  urls.forEach((url, i) => {
+    const card = document.createElement('div');
+    card.className = 'presta-card reveal rd' + ((i % 4) + 1);
+    card.innerHTML = `<video src="${url}" autoplay muted loop playsinline></video>`;
+    grid.appendChild(card);
+    // Trigger reveal
+    obs.observe(card);
+    // Autoplay
+    const v = card.querySelector('video');
+    v.play().catch(() => {});
+    const vObs = new IntersectionObserver(e => {
+      e.forEach(en => { if (en.isIntersecting) v.play().catch(() => {}); });
+    }, { threshold: 0.2 });
+    vObs.observe(card);
   });
 }
 
@@ -563,30 +624,32 @@ function tryLogin() {
 }
 
 function loadDashboard() {
+  document.getElementById('adminGrid').innerHTML = '';
+  videoCount = 0;
+
   if (!firebaseReady) {
-    DEFAULT_VIDEOS.forEach((url, i) => {
-      document.getElementById('vid' + (i+1)).value = url;
-      previewVid(i+1);
-    });
+    DEFAULT_VIDEOS.forEach((url, i) => createVideoSlot(i + 1, url));
     setStatus('⚠️ Firebase non configuré — mode local', 'error');
     return;
   }
 
   db.ref('videos').once('value').then(snap => {
-    const data = snap.val() || {};
-    for (let i = 1; i <= 4; i++) {
-      document.getElementById('vid' + i).value = data['video' + i] || DEFAULT_VIDEOS[i-1];
-      previewVid(i);
-    }
+    const data = snap.val();
+    const urls = (data && data.urls && data.urls.length) ? data.urls : DEFAULT_VIDEOS;
+    urls.forEach((url, i) => createVideoSlot(i + 1, url));
+  }).catch(() => {
+    DEFAULT_VIDEOS.forEach((url, i) => createVideoSlot(i + 1, url));
   });
 }
 
 function previewVid(n) {
-  const url = document.getElementById('vid' + n).value;
+  const input = document.getElementById('vid' + n);
   const prev = document.getElementById('prev' + n);
+  if (!input || !prev) return;
+  const url = input.value;
   if (url && url.match(/\.(mp4|webm|mov)/i)) {
     prev.src = url;
-    prev.play().catch(()=>{});
+    prev.play().catch(() => {});
   }
 }
 
@@ -596,19 +659,20 @@ function saveVideos() {
     return;
   }
 
-  const data = {};
-  for (let i = 1; i <= 4; i++) {
-    data['video' + i] = document.getElementById('vid' + i).value || DEFAULT_VIDEOS[i-1];
+  const urls = [];
+  const inputs = document.querySelectorAll('#adminGrid .admin-video-input');
+  inputs.forEach(input => {
+    if (input.value.trim()) urls.push(input.value.trim());
+  });
+
+  if (urls.length === 0) {
+    setStatus('⚠️ Ajoutez au moins une vidéo', 'error');
+    return;
   }
 
-  db.ref('videos').set(data).then(() => {
-    setStatus('✓ Vidéos sauvegardées ! Le site est mis à jour.', 'success');
-    // Update live videos on the page
-    const videos = document.querySelectorAll('.presta-card video');
-    videos.forEach((v, i) => {
-      v.src = data['video' + (i+1)];
-      v.play().catch(()=>{});
-    });
+  db.ref('videos').set({ urls: urls }).then(() => {
+    setStatus('✓ ' + urls.length + ' vidéo(s) sauvegardée(s) ! Site mis à jour.', 'success');
+    renderSiteVideos(urls);
     setTimeout(() => setStatus(''), 4000);
   }).catch(err => {
     setStatus('Erreur: ' + err.message, 'error');
@@ -616,17 +680,14 @@ function saveVideos() {
 }
 
 function resetVideos() {
-  for (let i = 1; i <= 4; i++) {
-    document.getElementById('vid' + i).value = DEFAULT_VIDEOS[i-1];
-    previewVid(i);
-  }
+  document.getElementById('adminGrid').innerHTML = '';
+  videoCount = 0;
+  DEFAULT_VIDEOS.forEach((url, i) => createVideoSlot(i + 1, url));
+
   if (firebaseReady) {
-    const data = {};
-    DEFAULT_VIDEOS.forEach((url, i) => { data['video' + (i+1)] = url; });
-    db.ref('videos').set(data).then(() => {
-      setStatus('✓ Vidéos réinitialisées aux valeurs par défaut.', 'success');
-      const videos = document.querySelectorAll('.presta-card video');
-      videos.forEach((v, i) => { v.src = DEFAULT_VIDEOS[i]; v.play().catch(()=>{}); });
+    db.ref('videos').set({ urls: DEFAULT_VIDEOS }).then(() => {
+      setStatus('✓ Vidéos réinitialisées (4 par défaut).', 'success');
+      renderSiteVideos(DEFAULT_VIDEOS);
       setTimeout(() => setStatus(''), 4000);
     });
   }
