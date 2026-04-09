@@ -141,6 +141,33 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
   .presta-grid{grid-template-columns:1fr}.svc-grid{grid-template-columns:1fr}
   .cta-card{padding:50px 24px}
 }
+/* ===== ADMIN DASHBOARD ===== */
+.admin-overlay{position:fixed;inset:0;z-index:99999;background:rgba(6,6,8,0.95);backdrop-filter:blur(30px);display:none;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s}
+.admin-overlay.show{display:flex;opacity:1}
+.admin-panel{background:var(--bg2);border:1px solid var(--border);border-radius:24px;padding:40px;width:90%;max-width:700px;max-height:90vh;overflow-y:auto;position:relative}
+.admin-panel::-webkit-scrollbar{width:3px}
+.admin-panel::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+.admin-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gray2);font-size:1.1rem;transition:all 0.3s}
+.admin-close:hover{background:rgba(212,168,83,0.1);border-color:var(--accent);color:var(--accent)}
+.admin-title{font-size:1.4rem;font-weight:800;margin-bottom:6px}
+.admin-sub{font-size:0.82rem;color:var(--gray2);margin-bottom:30px}
+.admin-login{display:flex;flex-direction:column;gap:16px;max-width:340px;margin:0 auto}
+.admin-input{width:100%;padding:14px 18px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;color:var(--white);font-family:var(--font);font-size:0.9rem;outline:none;transition:border-color 0.3s}
+.admin-input:focus{border-color:var(--accent)}
+.admin-input::placeholder{color:var(--gray3)}
+.admin-err{font-size:0.78rem;color:#ef4444;text-align:center;min-height:20px}
+.admin-grid{display:flex;flex-direction:column;gap:20px}
+.admin-video-item{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;transition:border-color 0.3s}
+.admin-video-item:hover{border-color:rgba(212,168,83,0.15)}
+.admin-video-label{font-size:0.78rem;color:var(--accent2);font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+.admin-video-input{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--white);font-family:var(--font);font-size:0.82rem;outline:none;transition:border-color 0.3s}
+.admin-video-input:focus{border-color:var(--accent)}
+.admin-video-preview{margin-top:10px;border-radius:8px;overflow:hidden;aspect-ratio:16/9;background:var(--bg)}
+.admin-video-preview video{width:100%;height:100%;object-fit:cover}
+.admin-save-row{display:flex;gap:12px;margin-top:24px}
+.admin-status{font-size:0.78rem;color:var(--gray2);margin-top:12px;text-align:center;min-height:20px}
+.admin-status.success{color:#22c55e}
+.admin-status.error{color:#ef4444}
 </style>
 </head>
 <body>
@@ -369,13 +396,296 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
   <span>© Evan Visions 2026</span>
 </footer>
 
+<!-- ===== ADMIN DASHBOARD ===== -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-panel">
+    <div class="admin-close" onclick="closeAdmin()">✕</div>
+
+    <!-- LOGIN VIEW -->
+    <div id="adminLogin">
+      <div class="admin-title">🔒 Dashboard Admin</div>
+      <div class="admin-sub">Connectez-vous pour gérer les vidéos du site.</div>
+      <div class="admin-login">
+        <input type="password" class="admin-input" id="adminPass" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')tryLogin()">
+        <button class="btn btn-fill" style="width:100%" onclick="tryLogin()">Se connecter</button>
+        <div class="admin-err" id="adminErr"></div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="adminDash" style="display:none">
+      <div class="admin-title">🎬 Gestion des vidéos</div>
+      <div class="admin-sub">Modifiez les URLs des vidéos de la section prestations. Les changements sont instantanés.</div>
+
+      <div class="admin-grid">
+        <div class="admin-video-item">
+          <div class="admin-video-label">Vidéo 1</div>
+          <input type="text" class="admin-video-input" id="vid1" placeholder="URL de la vidéo 1 (mp4)" oninput="previewVid(1)">
+          <div class="admin-video-preview"><video id="prev1" muted loop playsinline></video></div>
+        </div>
+        <div class="admin-video-item">
+          <div class="admin-video-label">Vidéo 2</div>
+          <input type="text" class="admin-video-input" id="vid2" placeholder="URL de la vidéo 2 (mp4)" oninput="previewVid(2)">
+          <div class="admin-video-preview"><video id="prev2" muted loop playsinline></video></div>
+        </div>
+        <div class="admin-video-item">
+          <div class="admin-video-label">Vidéo 3</div>
+          <input type="text" class="admin-video-input" id="vid3" placeholder="URL de la vidéo 3 (mp4)" oninput="previewVid(3)">
+          <div class="admin-video-preview"><video id="prev3" muted loop playsinline></video></div>
+        </div>
+        <div class="admin-video-item">
+          <div class="admin-video-label">Vidéo 4</div>
+          <input type="text" class="admin-video-input" id="vid4" placeholder="URL de la vidéo 4 (mp4)" oninput="previewVid(4)">
+          <div class="admin-video-preview"><video id="prev4" muted loop playsinline></video></div>
+        </div>
+      </div>
+
+      <div class="admin-save-row">
+        <button class="btn btn-fill" style="flex:1" onclick="saveVideos()">💾 Sauvegarder</button>
+        <button class="btn btn-ghost" style="flex:1" onclick="resetVideos()">↺ Réinitialiser</button>
+      </div>
+      <div class="admin-status" id="adminStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
-const obs=new IntersectionObserver(e=>{e.forEach(el=>{if(el.isIntersecting){el.target.classList.add('visible');obs.unobserve(el.target)}})},{threshold:0.1,rootMargin:'0px 0px -30px 0px'});
-document.querySelectorAll('.reveal,.reveal-scale').forEach(el=>obs.observe(el));
-let lastY=0;window.addEventListener('scroll',()=>{const nav=document.getElementById('navbar');const y=window.scrollY;nav.classList.toggle('scrolled',y>50);nav.style.transform=(y>lastY&&y>300)?'translateY(-100%)':'translateY(0)';lastY=y},{passive:true});
-document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener('click',e=>{const t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});document.getElementById('navLinks').classList.remove('open')}})});
-function toggleFaq(el){const item=el.parentElement;const ans=item.querySelector('.faq-a');const isOpen=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>{i.classList.remove('open');i.querySelector('.faq-a').style.maxHeight='0'});if(!isOpen){item.classList.add('open');ans.style.maxHeight=ans.scrollHeight+'px'}}
-document.querySelectorAll('.presta-card video').forEach(v=>{v.play().catch(()=>{});const vObs=new IntersectionObserver(e=>{e.forEach(en=>{if(en.isIntersecting)v.play().catch(()=>{})})},{threshold:0.2});vObs.observe(v)});
+// ============================================
+// ⚠️  FIREBASE CONFIG — À REMPLIR
+// ============================================
+// 1. Va sur https://console.firebase.google.com
+// 2. Crée un projet (ex: "evan-visions")
+// 3. Ajoute une app Web
+// 4. Copie ta config ici
+// 5. Active Realtime Database (mode test)
+// ============================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCcNYhMrJYnn1Yn8HUYxD-1ltVnOs3N2Yo",
+  authDomain: "evanvisions-d915b.firebaseapp.com",
+  databaseURL: "https://evanvisions-d915b-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "evanvisions-d915b",
+  storageBucket: "evanvisions-d915b.firebasestorage.app",
+  messagingSenderId: "81025635844",
+  appId: "1:81025635844:web:5cee2ff5ed7c14c18d4751",
+  measurementId: "G-PEF9C9G1ZX"
+};
+
+// Mot de passe admin (change-le !)
+const ADMIN_PASSWORD = "EvanVisions2026!";
+
+// URLs par défaut des vidéos
+const DEFAULT_VIDEOS = [
+  "https://framerusercontent.com/assets/LJaPTEb2VMsX5NkyqMFbo4areQ.mp4",
+  "https://framerusercontent.com/assets/q3cG9dFtdoMBHgI3nvDDIsgIZzE.mp4",
+  "https://framerusercontent.com/assets/bYHC9y6uUibjxDCCoejbrpONgpo.mp4",
+  "https://framerusercontent.com/assets/6zy3fAJpudISQNJQLTGaZXMCIEc.mp4"
+];
+
+// ============================================
+// FIREBASE INIT
+// ============================================
+let db = null;
+let firebaseReady = false;
+
+try {
+  if (firebaseConfig.apiKey !== "REMPLACE-MOI") {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+    firebaseReady = true;
+  }
+} catch(e) {
+  console.log("Firebase non configuré — utilisation des vidéos par défaut");
+}
+
+// ============================================
+// LOAD VIDEOS FROM FIREBASE
+// ============================================
+function loadVideos() {
+  const videos = document.querySelectorAll('.presta-card video');
+  if (!firebaseReady || !db) {
+    // Pas de Firebase = on garde les vidéos par défaut
+    videos.forEach(v => { v.play().catch(()=>{}); });
+    return;
+  }
+
+  db.ref('videos').once('value').then(snap => {
+    const data = snap.val();
+    if (data) {
+      videos.forEach((v, i) => {
+        const url = data['video' + (i+1)] || DEFAULT_VIDEOS[i];
+        if (v.src !== url) { v.src = url; }
+        v.play().catch(()=>{});
+      });
+    } else {
+      videos.forEach(v => v.play().catch(()=>{}));
+    }
+  }).catch(() => {
+    videos.forEach(v => v.play().catch(()=>{}));
+  });
+}
+
+// ============================================
+// ADMIN DASHBOARD LOGIC
+// ============================================
+let isAdmin = false;
+
+function openAdmin() {
+  document.getElementById('adminOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  if (isAdmin) {
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminDash').style.display = 'block';
+    loadDashboard();
+  }
+}
+
+function closeAdmin() {
+  document.getElementById('adminOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function tryLogin() {
+  const pass = document.getElementById('adminPass').value;
+  if (pass === ADMIN_PASSWORD) {
+    isAdmin = true;
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminDash').style.display = 'block';
+    document.getElementById('adminErr').textContent = '';
+    loadDashboard();
+  } else {
+    document.getElementById('adminErr').textContent = 'Mot de passe incorrect';
+    document.getElementById('adminPass').value = '';
+  }
+}
+
+function loadDashboard() {
+  if (!firebaseReady) {
+    DEFAULT_VIDEOS.forEach((url, i) => {
+      document.getElementById('vid' + (i+1)).value = url;
+      previewVid(i+1);
+    });
+    setStatus('⚠️ Firebase non configuré — mode local', 'error');
+    return;
+  }
+
+  db.ref('videos').once('value').then(snap => {
+    const data = snap.val() || {};
+    for (let i = 1; i <= 4; i++) {
+      document.getElementById('vid' + i).value = data['video' + i] || DEFAULT_VIDEOS[i-1];
+      previewVid(i);
+    }
+  });
+}
+
+function previewVid(n) {
+  const url = document.getElementById('vid' + n).value;
+  const prev = document.getElementById('prev' + n);
+  if (url && url.match(/\.(mp4|webm|mov)/i)) {
+    prev.src = url;
+    prev.play().catch(()=>{});
+  }
+}
+
+function saveVideos() {
+  if (!firebaseReady) {
+    setStatus('⚠️ Firebase non configuré — impossible de sauvegarder', 'error');
+    return;
+  }
+
+  const data = {};
+  for (let i = 1; i <= 4; i++) {
+    data['video' + i] = document.getElementById('vid' + i).value || DEFAULT_VIDEOS[i-1];
+  }
+
+  db.ref('videos').set(data).then(() => {
+    setStatus('✓ Vidéos sauvegardées ! Le site est mis à jour.', 'success');
+    // Update live videos on the page
+    const videos = document.querySelectorAll('.presta-card video');
+    videos.forEach((v, i) => {
+      v.src = data['video' + (i+1)];
+      v.play().catch(()=>{});
+    });
+    setTimeout(() => setStatus(''), 4000);
+  }).catch(err => {
+    setStatus('Erreur: ' + err.message, 'error');
+  });
+}
+
+function resetVideos() {
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('vid' + i).value = DEFAULT_VIDEOS[i-1];
+    previewVid(i);
+  }
+  if (firebaseReady) {
+    const data = {};
+    DEFAULT_VIDEOS.forEach((url, i) => { data['video' + (i+1)] = url; });
+    db.ref('videos').set(data).then(() => {
+      setStatus('✓ Vidéos réinitialisées aux valeurs par défaut.', 'success');
+      const videos = document.querySelectorAll('.presta-card video');
+      videos.forEach((v, i) => { v.src = DEFAULT_VIDEOS[i]; v.play().catch(()=>{}); });
+      setTimeout(() => setStatus(''), 4000);
+    });
+  }
+}
+
+function setStatus(msg, type) {
+  const el = document.getElementById('adminStatus');
+  el.textContent = msg;
+  el.className = 'admin-status' + (type ? ' ' + type : '');
+}
+
+// ============================================
+// MAIN INIT
+// ============================================
+// Reveal animations
+const obs = new IntersectionObserver(e => {
+  e.forEach(el => { if (el.isIntersecting) { el.target.classList.add('visible'); obs.unobserve(el.target); } });
+}, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.reveal,.reveal-scale').forEach(el => obs.observe(el));
+
+// Nav scroll
+let lastY = 0;
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  const y = window.scrollY;
+  nav.classList.toggle('scrolled', y > 50);
+  nav.style.transform = (y > lastY && y > 300) ? 'translateY(-100%)' : 'translateY(0)';
+  lastY = y;
+}, { passive: true });
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const t = document.querySelector(a.getAttribute('href'));
+    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); document.getElementById('navLinks').classList.remove('open'); }
+  });
+});
+
+// FAQ
+function toggleFaq(el) {
+  const item = el.parentElement;
+  const ans = item.querySelector('.faq-a');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => { i.classList.remove('open'); i.querySelector('.faq-a').style.maxHeight = '0'; });
+  if (!isOpen) { item.classList.add('open'); ans.style.maxHeight = ans.scrollHeight + 'px'; }
+}
+
+// Load videos from Firebase (or defaults)
+loadVideos();
+
+// Open admin if ?admin in URL
+if (window.location.search.includes('admin')) {
+  openAdmin();
+}
+
+// Also open with Ctrl+Shift+A shortcut
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'A') { e.preventDefault(); openAdmin(); }
+});
 </script>
 </body>
 </html>
