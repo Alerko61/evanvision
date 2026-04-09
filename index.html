@@ -181,6 +181,20 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
 .admin-size-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--gray4);border-radius:2px;outline:none}
 .admin-size-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg)}
 .admin-size-row .size-val{font-size:0.75rem;color:var(--accent);font-weight:600;min-width:36px;text-align:right}
+.admin-review-item{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;transition:border-color 0.3s}
+.admin-review-item:hover{border-color:rgba(212,168,83,0.15)}
+.admin-review-row{display:flex;gap:10px;margin-bottom:10px}
+.admin-review-row .admin-video-input{flex:1}
+.admin-review-small{width:80px!important;flex:none!important}
+.admin-review-textarea{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--white);font-family:var(--font);font-size:0.82rem;outline:none;resize:vertical;min-height:70px;transition:border-color 0.3s;line-height:1.5}
+.admin-review-textarea:focus{border-color:var(--accent)}
+.admin-review-textarea::placeholder{color:var(--gray3)}
+.admin-confirm-overlay{position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center}
+.admin-confirm-overlay.show{display:flex}
+.admin-confirm-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:36px;max-width:420px;width:90%;text-align:center}
+.admin-confirm-box h3{font-size:1.1rem;font-weight:700;margin-bottom:8px;color:#ef4444}
+.admin-confirm-box p{font-size:0.85rem;color:var(--gray2);line-height:1.6;margin-bottom:24px}
+.admin-confirm-btns{display:flex;gap:10px;justify-content:center}
 </style>
 </head>
 <body>
@@ -274,8 +288,8 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
     <div class="ally-content">
       <h3>Votre allié <span class="gold">créatif.</span></h3>
       <div class="ally-underline"></div>
-      <p>Je suis vidéaste basé à Lyon, spécialisé dans la création de vidéos sur mesure pour les entreprises et les marques. Mon objectif : produire du contenu professionnel et cohérent avec votre image.</p>
-      <p>Curieux de nature et passionné par l'image depuis plus de dix ans, j'accompagne mes clients de la stratégie jusqu'au contenu livrable. Chaque marque a un processus simple, agréable et efficace, tout en garantissant un résultat qui génère de la visibilité et performance.</p>
+      <p>Je suis vidéaste basé à Lyon, spécialisé dans la création de vidéos sur-mesure pour les entreprises et les marques. Mon objectif : produire du contenu professionnel et cohérent avec votre image.</p>
+      <p>Formé en école audiovisuelle et passionné par l'image depuis plus de dix ans, j'accompagne mes clients de la stratégie jusqu'aux conseils après livraison. J'aime rendre le processus simple, agréable et efficace, tout en garantissant un résultat qui génère visibilité et performance.</p>
       <p>Prêt à donner plus d'impact à votre communication ? Parlons de votre projet.</p>
       <br>
       <a href="https://wa.me/33781325185?text=Bonjour%20Evan%2C%20j%27aimerais%20discuter%20de%20mon%20projet%20vid%C3%A9o%20et%20obtenir%20vos%20conseils%20pour%20avancer.%20%C3%8Ates-vous%20disponible%20%3F" target="_blank" class="btn btn-fill" style="text-align:center;justify-content:center">Prendre Contact →</a>
@@ -447,11 +461,31 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
       <div class="admin-grid" id="adminLogoGrid"></div>
       <button class="admin-add-btn" onclick="addLogoSlot()">+ Ajouter un logo</button>
 
+      <div class="admin-divider"></div>
+
+      <div class="admin-title">⭐ Gestion des avis clients</div>
+      <div class="admin-sub">Ajoutez, modifiez ou supprimez les avis de la section témoignages. Attention, la suppression est irréversible.</div>
+
+      <div class="admin-grid" id="adminReviewGrid"></div>
+      <button class="admin-add-btn" onclick="addReviewSlot()">+ Ajouter un avis</button>
+
       <div class="admin-save-row">
         <button class="btn btn-fill" style="flex:1" onclick="saveVideos()">💾 Sauvegarder</button>
         <button class="btn btn-ghost" style="flex:1" onclick="resetVideos()">↺ Réinitialiser</button>
       </div>
       <div class="admin-status" id="adminStatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Dialog -->
+<div class="admin-confirm-overlay" id="confirmOverlay">
+  <div class="admin-confirm-box">
+    <h3>⚠️ Suppression irréversible</h3>
+    <p>Êtes-vous sûr de vouloir supprimer cet avis client ? Cette action est définitive et ne pourra pas être annulée.</p>
+    <div class="admin-confirm-btns">
+      <button class="btn btn-ghost" onclick="cancelDelete()">Annuler</button>
+      <button class="btn" style="background:#ef4444;color:white" onclick="confirmDelete()">Supprimer définitivement</button>
     </div>
   </div>
 </div>
@@ -495,6 +529,16 @@ const DEFAULT_VIDEOS = [
 let videoCount = 0;
 let logoCount = 0;
 let logoSize = 90;
+let reviewCount = 0;
+let deleteTarget = null;
+
+const DEFAULT_REVIEWS = [
+  { name: "Capital Club", initials: "CC", quote: "Nous avons eu la chance d'être accompagnés par Evan pendant deux jours de tournage. Il nous a marqué par sa capacité à gérer avec efficacité les imprévus. Le résultat final est très professionnel, il nous a même offert de superbes photos. Un vrai plaisir de collaborer avec lui, nous recommandons sans hésitation !" },
+  { name: "Rayane B.", initials: "RB", quote: "Qualité des photos au top mais surtout une rapidité sur le montage et l'envoi assez exceptionnelle !" },
+  { name: "DKS TV", initials: "DK", quote: "Excellente prestation ! Merci encore !" },
+  { name: "Julien M.", initials: "JM", quote: "Incroyable boulot, conforme à mes attentes et du travail sérieux, des retours très fréquents bravo !" },
+  { name: "Quentin T.", initials: "QT", quote: "Contenu très qualitatif je recommande !" }
+];
 
 // URLs par défaut des logos
 const DEFAULT_LOGOS = [
@@ -717,6 +761,128 @@ function loadLogos() {
 }
 
 // ============================================
+// DYNAMIC REVIEW SLOTS (DASHBOARD)
+// ============================================
+function createReviewSlot(n, data) {
+  const d = data || { name: '', initials: '', quote: '' };
+  const item = document.createElement('div');
+  item.className = 'admin-review-item';
+  item.id = 'reviewItem' + n;
+  item.innerHTML = `
+    <div class="admin-video-label">Avis ${n}</div>
+    <div class="admin-remove-btn" onclick="askDeleteReview(${n})">✕</div>
+    <div class="admin-review-row">
+      <input type="text" class="admin-video-input" id="revName${n}" placeholder="Nom (ex: Capital Club)" value="${d.name}">
+      <input type="text" class="admin-video-input admin-review-small" id="revInit${n}" placeholder="Initiales" value="${d.initials}" maxlength="3">
+    </div>
+    <textarea class="admin-review-textarea" id="revQuote${n}" placeholder="Texte de l'avis...">${d.quote}</textarea>
+  `;
+  document.getElementById('adminReviewGrid').appendChild(item);
+  reviewCount = Math.max(reviewCount, n);
+}
+
+function addReviewSlot(data) {
+  reviewCount++;
+  createReviewSlot(reviewCount, data || null);
+  if (!data) document.getElementById('revName' + reviewCount).focus();
+}
+
+function askDeleteReview(n) {
+  deleteTarget = n;
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+
+function cancelDelete() {
+  deleteTarget = null;
+  document.getElementById('confirmOverlay').classList.remove('show');
+}
+
+function confirmDelete() {
+  if (deleteTarget) {
+    const item = document.getElementById('reviewItem' + deleteTarget);
+    if (item) {
+      item.style.transition = 'all 0.3s';
+      item.style.opacity = '0';
+      item.style.transform = 'scale(0.95)';
+      setTimeout(() => { item.remove(); renumberReviewSlots(); }, 300);
+    }
+  }
+  deleteTarget = null;
+  document.getElementById('confirmOverlay').classList.remove('show');
+}
+
+function renumberReviewSlots() {
+  const items = document.querySelectorAll('#adminReviewGrid .admin-review-item');
+  reviewCount = 0;
+  items.forEach((item, i) => {
+    const n = i + 1;
+    reviewCount = n;
+    item.id = 'reviewItem' + n;
+    item.querySelector('.admin-video-label').textContent = 'Avis ' + n;
+    item.querySelector('.admin-remove-btn').setAttribute('onclick', `askDeleteReview(${n})`);
+    const inputs = item.querySelectorAll('.admin-video-input');
+    inputs[0].id = 'revName' + n;
+    inputs[1].id = 'revInit' + n;
+    item.querySelector('.admin-review-textarea').id = 'revQuote' + n;
+  });
+}
+
+function getReviewsFromDashboard() {
+  const reviews = [];
+  const items = document.querySelectorAll('#adminReviewGrid .admin-review-item');
+  items.forEach((item, i) => {
+    const n = i + 1;
+    const name = document.getElementById('revName' + n);
+    const init = document.getElementById('revInit' + n);
+    const quote = document.getElementById('revQuote' + n);
+    if (name && quote && quote.value.trim()) {
+      reviews.push({
+        name: name.value.trim() || 'Client',
+        initials: init.value.trim() || name.value.trim().substring(0, 2).toUpperCase(),
+        quote: quote.value.trim()
+      });
+    }
+  });
+  return reviews;
+}
+
+function renderSiteReviews(reviews) {
+  const track = document.querySelector('.avis-marquee-track');
+  track.innerHTML = '';
+  // Create cards x2 for seamless loop
+  for (let r = 0; r < 2; r++) {
+    reviews.forEach(rev => {
+      const card = document.createElement('div');
+      card.className = 'avis-card';
+      card.innerHTML = `
+        <div class="avis-quote">« ${rev.quote} »</div>
+        <div class="avis-stars">★★★★★</div>
+        <div class="avis-author">
+          <div class="avis-av">${rev.initials}</div>
+          <div><div class="avis-name">${rev.name}</div><div class="avis-role">Client</div></div>
+        </div>
+      `;
+      track.appendChild(card);
+    });
+  }
+}
+
+function loadReviews() {
+  if (!firebaseReady || !db) {
+    renderSiteReviews(DEFAULT_REVIEWS);
+    return;
+  }
+  db.ref('reviews').once('value').then(snap => {
+    const data = snap.val();
+    if (data && data.length) {
+      renderSiteReviews(data);
+    } else {
+      renderSiteReviews(DEFAULT_REVIEWS);
+    }
+  }).catch(() => renderSiteReviews(DEFAULT_REVIEWS));
+}
+
+// ============================================
 // LOAD VIDEOS FROM FIREBASE → SITE + DASHBOARD
 // ============================================
 function loadVideos() {
@@ -791,12 +957,15 @@ function tryLogin() {
 function loadDashboard() {
   document.getElementById('adminGrid').innerHTML = '';
   document.getElementById('adminLogoGrid').innerHTML = '';
+  document.getElementById('adminReviewGrid').innerHTML = '';
   videoCount = 0;
   logoCount = 0;
+  reviewCount = 0;
 
   if (!firebaseReady) {
     DEFAULT_VIDEOS.forEach((url, i) => createVideoSlot(i + 1, url));
     DEFAULT_LOGOS.forEach((url, i) => createLogoSlot(i + 1, url));
+    DEFAULT_REVIEWS.forEach((rev, i) => createReviewSlot(i + 1, rev));
     document.getElementById('logoSizeSlider').value = 90;
     document.getElementById('logoSizeVal').textContent = '90px';
     setStatus('⚠️ Firebase non configuré — mode local', 'error');
@@ -822,6 +991,14 @@ function loadDashboard() {
     logoSize = avgSize;
   }).catch(() => {
     DEFAULT_LOGOS.forEach((url, i) => createLogoSlot(i + 1, url, 90));
+  });
+
+  db.ref('reviews').once('value').then(snap => {
+    const data = snap.val();
+    const revs = (data && data.length) ? data : DEFAULT_REVIEWS;
+    revs.forEach((rev, i) => createReviewSlot(i + 1, rev));
+  }).catch(() => {
+    DEFAULT_REVIEWS.forEach((rev, i) => createReviewSlot(i + 1, rev));
   });
 }
 
@@ -864,15 +1041,20 @@ function saveVideos() {
     }
   });
 
+  // Save reviews
+  const reviews = getReviewsFromDashboard();
+
   const saves = [
     db.ref('videos').set({ urls: vidUrls }),
-    db.ref('logos').set({ urls: logoUrls.length ? logoUrls : DEFAULT_LOGOS, sizes: logoSizes.length ? logoSizes : [90,90,90,90] })
+    db.ref('logos').set({ urls: logoUrls.length ? logoUrls : DEFAULT_LOGOS, sizes: logoSizes.length ? logoSizes : [90,90,90,90] }),
+    db.ref('reviews').set(reviews.length ? reviews : DEFAULT_REVIEWS)
   ];
 
   Promise.all(saves).then(() => {
-    setStatus('✓ ' + vidUrls.length + ' vidéo(s) + ' + logoUrls.length + ' logo(s) sauvegardés !', 'success');
+    setStatus('✓ ' + vidUrls.length + ' vidéo(s) + ' + logoUrls.length + ' logo(s) + ' + reviews.length + ' avis sauvegardés !', 'success');
     renderSiteVideos(vidUrls);
     renderSiteLogos(logoUrls.length ? logoUrls : DEFAULT_LOGOS, logoSizes.length ? logoSizes : [90,90,90,90]);
+    renderSiteReviews(reviews.length ? reviews : DEFAULT_REVIEWS);
     setTimeout(() => setStatus(''), 4000);
   }).catch(err => {
     setStatus('Erreur: ' + err.message, 'error');
@@ -882,10 +1064,13 @@ function saveVideos() {
 function resetVideos() {
   document.getElementById('adminGrid').innerHTML = '';
   document.getElementById('adminLogoGrid').innerHTML = '';
+  document.getElementById('adminReviewGrid').innerHTML = '';
   videoCount = 0;
   logoCount = 0;
+  reviewCount = 0;
   DEFAULT_VIDEOS.forEach((url, i) => createVideoSlot(i + 1, url));
   DEFAULT_LOGOS.forEach((url, i) => createLogoSlot(i + 1, url));
+  DEFAULT_REVIEWS.forEach((rev, i) => createReviewSlot(i + 1, rev));
   logoSize = 90;
   document.getElementById('logoSizeSlider').value = 90;
   document.getElementById('logoSizeVal').textContent = '90px';
@@ -893,11 +1078,13 @@ function resetVideos() {
   if (firebaseReady) {
     Promise.all([
       db.ref('videos').set({ urls: DEFAULT_VIDEOS }),
-      db.ref('logos').set({ urls: DEFAULT_LOGOS, size: 90 })
+      db.ref('logos').set({ urls: DEFAULT_LOGOS, size: 90 }),
+      db.ref('reviews').set(DEFAULT_REVIEWS)
     ]).then(() => {
-      setStatus('✓ Vidéos + logos réinitialisés par défaut.', 'success');
+      setStatus('✓ Vidéos + logos + avis réinitialisés par défaut.', 'success');
       renderSiteVideos(DEFAULT_VIDEOS);
       renderSiteLogos(DEFAULT_LOGOS, 90);
+      renderSiteReviews(DEFAULT_REVIEWS);
       setTimeout(() => setStatus(''), 4000);
     });
   }
@@ -948,6 +1135,7 @@ function toggleFaq(el) {
 // Load videos + logos from Firebase (or defaults)
 loadVideos();
 loadLogos();
+loadReviews();
 
 // Open admin if ?admin in URL
 if (window.location.search.includes('admin')) {
