@@ -482,7 +482,7 @@ const firebaseConfig = {
 };
 
 // Mot de passe admin (change-le !)
-const ADMIN_PASSWORD = "EvanVisions2026!";
+const ADMIN_PASSWORD = "akinator01";
 
 // URLs par défaut des vidéos
 const DEFAULT_VIDEOS = [
@@ -586,7 +586,8 @@ function renumberSlots() {
 // ============================================
 // DYNAMIC LOGO SLOTS (DASHBOARD)
 // ============================================
-function createLogoSlot(n, url) {
+function createLogoSlot(n, url, size) {
+  const s = size || logoSize || 90;
   const item = document.createElement('div');
   item.className = 'admin-video-item';
   item.id = 'logoItem' + n;
@@ -594,7 +595,12 @@ function createLogoSlot(n, url) {
     <div class="admin-video-label">Logo ${n}</div>
     ${n > 1 ? `<div class="admin-remove-btn" onclick="removeLogoSlot(${n})">✕</div>` : ''}
     <input type="text" class="admin-video-input" id="logo${n}" placeholder="URL du logo ${n} (webp, png, svg, jpg)" value="${url || ''}" oninput="previewLogo(${n})">
-    <div class="admin-logo-preview" id="logoPrev${n}">${url ? `<img src="${url}" alt="Logo ${n}">` : ''}</div>
+    <div class="admin-logo-preview" id="logoPrev${n}">${url ? `<img src="${url}" alt="Logo ${n}" style="height:${s}px">` : ''}</div>
+    <div class="admin-size-row">
+      <label>Taille</label>
+      <input type="range" id="logoSize${n}" min="20" max="160" value="${s}" oninput="updateSingleLogoSize(${n}, this.value)">
+      <span class="size-val" id="logoSizeVal${n}">${s}px</span>
+    </div>
   `;
   document.getElementById('adminLogoGrid').appendChild(item);
   logoCount = Math.max(logoCount, n);
@@ -646,32 +652,50 @@ function renumberLogoSlots() {
 function previewLogo(n) {
   const url = document.getElementById('logo' + n).value;
   const prev = document.getElementById('logoPrev' + n);
+  const sizeInput = document.getElementById('logoSize' + n);
+  const s = sizeInput ? sizeInput.value : 90;
   if (url) {
-    prev.innerHTML = `<img src="${url}" alt="Logo ${n}">`;
+    prev.innerHTML = `<img src="${url}" alt="Logo ${n}" style="height:${s}px">`;
   } else {
     prev.innerHTML = '';
   }
 }
 
+function updateSingleLogoSize(n, val) {
+  document.getElementById('logoSizeVal' + n).textContent = val + 'px';
+  const prev = document.getElementById('logoPrev' + n);
+  const img = prev.querySelector('img');
+  if (img) img.style.height = val + 'px';
+}
+
 function updateLogoSize(val) {
   logoSize = parseInt(val);
   document.getElementById('logoSizeVal').textContent = val + 'px';
-  // Live update on site
+  // Apply to all individual sliders too
+  for (let i = 1; i <= logoCount; i++) {
+    const slider = document.getElementById('logoSize' + i);
+    if (slider) {
+      slider.value = val;
+      document.getElementById('logoSizeVal' + i).textContent = val + 'px';
+      const img = document.getElementById('logoPrev' + i).querySelector('img');
+      if (img) img.style.height = val + 'px';
+    }
+  }
   document.querySelectorAll('.marquee-track img').forEach(img => {
     img.style.height = val + 'px';
   });
 }
 
-function renderSiteLogos(urls, size) {
+function renderSiteLogos(urls, sizes) {
   const track = document.querySelector('.marquee-track');
   track.innerHTML = '';
-  // Repeat logos enough times to fill the marquee (6x)
   for (let r = 0; r < 6; r++) {
-    urls.forEach(url => {
+    urls.forEach((url, i) => {
       const img = document.createElement('img');
       img.src = url;
       img.alt = 'Client Evan Visions';
-      img.style.height = (size || 90) + 'px';
+      const s = Array.isArray(sizes) ? (sizes[i] || 90) : (sizes || 90);
+      img.style.height = s + 'px';
       track.appendChild(img);
     });
   }
@@ -685,8 +709,7 @@ function loadLogos() {
   db.ref('logos').once('value').then(snap => {
     const data = snap.val();
     if (data && data.urls && data.urls.length) {
-      logoSize = data.size || 90;
-      renderSiteLogos(data.urls, logoSize);
+      renderSiteLogos(data.urls, data.sizes || 90);
     } else {
       renderSiteLogos(DEFAULT_LOGOS, 90);
     }
@@ -791,13 +814,14 @@ function loadDashboard() {
   db.ref('logos').once('value').then(snap => {
     const data = snap.val();
     const urls = (data && data.urls && data.urls.length) ? data.urls : DEFAULT_LOGOS;
-    const size = (data && data.size) ? data.size : 90;
-    urls.forEach((url, i) => createLogoSlot(i + 1, url));
-    document.getElementById('logoSizeSlider').value = size;
-    document.getElementById('logoSizeVal').textContent = size + 'px';
-    logoSize = size;
+    const sizes = (data && data.sizes) ? data.sizes : [];
+    urls.forEach((url, i) => createLogoSlot(i + 1, url, sizes[i] || 90));
+    const avgSize = sizes.length ? Math.round(sizes.reduce((a,b)=>a+b,0)/sizes.length) : 90;
+    document.getElementById('logoSizeSlider').value = avgSize;
+    document.getElementById('logoSizeVal').textContent = avgSize + 'px';
+    logoSize = avgSize;
   }).catch(() => {
-    DEFAULT_LOGOS.forEach((url, i) => createLogoSlot(i + 1, url));
+    DEFAULT_LOGOS.forEach((url, i) => createLogoSlot(i + 1, url, 90));
   });
 }
 
@@ -828,21 +852,27 @@ function saveVideos() {
     return;
   }
 
-  // Save logos
+  // Save logos with individual sizes
   const logoUrls = [];
-  document.querySelectorAll('#adminLogoGrid .admin-video-input').forEach(input => {
-    if (input.value.trim()) logoUrls.push(input.value.trim());
+  const logoSizes = [];
+  document.querySelectorAll('#adminLogoGrid .admin-video-item').forEach((item, i) => {
+    const input = item.querySelector('.admin-video-input');
+    const sizeInput = item.querySelector('input[type=range]');
+    if (input && input.value.trim()) {
+      logoUrls.push(input.value.trim());
+      logoSizes.push(parseInt(sizeInput ? sizeInput.value : 90));
+    }
   });
 
   const saves = [
     db.ref('videos').set({ urls: vidUrls }),
-    db.ref('logos').set({ urls: logoUrls.length ? logoUrls : DEFAULT_LOGOS, size: logoSize })
+    db.ref('logos').set({ urls: logoUrls.length ? logoUrls : DEFAULT_LOGOS, sizes: logoSizes.length ? logoSizes : [90,90,90,90] })
   ];
 
   Promise.all(saves).then(() => {
     setStatus('✓ ' + vidUrls.length + ' vidéo(s) + ' + logoUrls.length + ' logo(s) sauvegardés !', 'success');
     renderSiteVideos(vidUrls);
-    renderSiteLogos(logoUrls.length ? logoUrls : DEFAULT_LOGOS, logoSize);
+    renderSiteLogos(logoUrls.length ? logoUrls : DEFAULT_LOGOS, logoSizes.length ? logoSizes : [90,90,90,90]);
     setTimeout(() => setStatus(''), 4000);
   }).catch(err => {
     setStatus('Erreur: ' + err.message, 'error');
