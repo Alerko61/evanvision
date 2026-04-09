@@ -173,6 +173,14 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
 .admin-remove-btn{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#ef4444;font-size:0.8rem;transition:all 0.3s;font-family:var(--font)}
 .admin-remove-btn:hover{background:rgba(239,68,68,0.15);border-color:#ef4444}
 .admin-video-item{position:relative}
+.admin-divider{height:1px;background:var(--border);margin:30px 0}
+.admin-logo-preview{height:60px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:8px;margin-top:10px;padding:10px;overflow:hidden}
+.admin-logo-preview img{max-height:100%;max-width:100%;object-fit:contain}
+.admin-size-row{display:flex;align-items:center;gap:12px;margin-top:10px}
+.admin-size-row label{font-size:0.72rem;color:var(--gray2);white-space:nowrap;min-width:40px}
+.admin-size-row input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--gray4);border-radius:2px;outline:none}
+.admin-size-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid var(--bg)}
+.admin-size-row .size-val{font-size:0.75rem;color:var(--accent);font-weight:600;min-width:36px;text-align:right}
 </style>
 </head>
 <body>
@@ -253,11 +261,11 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
   </div>
 
   <div class="about-text reveal">
-    <p>Je travaille <span class="italic">avec vous</span> pour <span class="italic">comprendre vos besoins</span> et vos défis, puis je transforme <span class="italic">vos idées en vidéos</span> sur mesure qui captent l'attention et <span class="italic">font la différence.</span></p>
+    <p>Je travaille <strong style="color:var(--accent)">avec vous</strong> pour <strong style="color:var(--accent)">comprendre vos besoins</strong> et vos défis, puis je transforme <strong style="color:var(--accent)">vos idées en vidéos</strong> sur mesure qui captent l'attention et <strong style="color:var(--accent)">font la différence.</strong></p>
     <br>
-    <p>Mon objectif : révéler ce qui vous rend unique, <span class="italic">raconter votre histoire</span> avec style et impact, et créer des visuels qui <span class="italic">soutiennent vos ambitions.</span></p>
+    <p>Mon objectif : révéler ce qui vous rend unique, <strong style="color:var(--accent)">raconter votre histoire</strong> avec style et impact, et créer des visuels qui <strong style="color:var(--accent)">soutiennent vos ambitions.</strong></p>
     <br>
-    <p>Votre marque mérite d'être vue. <span class="italic">Ensemble,</span> mettons-la au <span class="italic">premier plan.</span></p>
+    <p>Votre marque mérite d'être vue. <strong style="color:var(--accent)">Ensemble,</strong> mettons-la au <strong style="color:var(--accent)">premier plan.</strong></p>
   </div>
 
   <!-- ALLY -->
@@ -425,6 +433,20 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
       <div class="admin-grid" id="adminGrid"></div>
       <button class="admin-add-btn" onclick="addVideoSlot()">+ Ajouter une vidéo</button>
 
+      <div class="admin-divider"></div>
+
+      <div class="admin-title">🖼 Gestion des logos</div>
+      <div class="admin-sub">Modifiez les logos de la section "Ils me font confiance". Formats acceptés : webp, png, svg, jpg.</div>
+
+      <div class="admin-size-row" style="margin-bottom:20px">
+        <label>Taille globale</label>
+        <input type="range" id="logoSizeSlider" min="30" max="160" value="90" oninput="updateLogoSize(this.value)">
+        <span class="size-val" id="logoSizeVal">90px</span>
+      </div>
+
+      <div class="admin-grid" id="adminLogoGrid"></div>
+      <button class="admin-add-btn" onclick="addLogoSlot()">+ Ajouter un logo</button>
+
       <div class="admin-save-row">
         <button class="btn btn-fill" style="flex:1" onclick="saveVideos()">💾 Sauvegarder</button>
         <button class="btn btn-ghost" style="flex:1" onclick="resetVideos()">↺ Réinitialiser</button>
@@ -471,6 +493,16 @@ const DEFAULT_VIDEOS = [
 ];
 
 let videoCount = 0;
+let logoCount = 0;
+let logoSize = 90;
+
+// URLs par défaut des logos
+const DEFAULT_LOGOS = [
+  "https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540",
+  "https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920",
+  "https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920",
+  "https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104"
+];
 
 // ============================================
 // FIREBASE INIT
@@ -552,6 +584,116 @@ function renumberSlots() {
 }
 
 // ============================================
+// DYNAMIC LOGO SLOTS (DASHBOARD)
+// ============================================
+function createLogoSlot(n, url) {
+  const item = document.createElement('div');
+  item.className = 'admin-video-item';
+  item.id = 'logoItem' + n;
+  item.innerHTML = `
+    <div class="admin-video-label">Logo ${n}</div>
+    ${n > 1 ? `<div class="admin-remove-btn" onclick="removeLogoSlot(${n})">✕</div>` : ''}
+    <input type="text" class="admin-video-input" id="logo${n}" placeholder="URL du logo ${n} (webp, png, svg, jpg)" value="${url || ''}" oninput="previewLogo(${n})">
+    <div class="admin-logo-preview" id="logoPrev${n}">${url ? `<img src="${url}" alt="Logo ${n}">` : ''}</div>
+  `;
+  document.getElementById('adminLogoGrid').appendChild(item);
+  logoCount = Math.max(logoCount, n);
+}
+
+function addLogoSlot(url) {
+  logoCount++;
+  createLogoSlot(logoCount, url || '');
+  if (!url) document.getElementById('logo' + logoCount).focus();
+}
+
+function removeLogoSlot(n) {
+  const item = document.getElementById('logoItem' + n);
+  if (item) {
+    item.style.transition = 'all 0.3s';
+    item.style.opacity = '0';
+    item.style.transform = 'scale(0.95)';
+    setTimeout(() => { item.remove(); renumberLogoSlots(); }, 300);
+  }
+}
+
+function renumberLogoSlots() {
+  const items = document.querySelectorAll('#adminLogoGrid .admin-video-item');
+  logoCount = 0;
+  items.forEach((item, i) => {
+    const n = i + 1;
+    logoCount = n;
+    item.id = 'logoItem' + n;
+    item.querySelector('.admin-video-label').textContent = 'Logo ' + n;
+    const input = item.querySelector('.admin-video-input');
+    input.id = 'logo' + n;
+    input.setAttribute('oninput', `previewLogo(${n})`);
+    input.placeholder = `URL du logo ${n} (webp, png, svg, jpg)`;
+    const prevDiv = item.querySelector('.admin-logo-preview');
+    prevDiv.id = 'logoPrev' + n;
+    const removeBtn = item.querySelector('.admin-remove-btn');
+    if (n === 1) { if (removeBtn) removeBtn.remove(); }
+    else if (removeBtn) { removeBtn.setAttribute('onclick', `removeLogoSlot(${n})`); }
+    else {
+      const btn = document.createElement('div');
+      btn.className = 'admin-remove-btn';
+      btn.setAttribute('onclick', `removeLogoSlot(${n})`);
+      btn.textContent = '✕';
+      item.appendChild(btn);
+    }
+  });
+}
+
+function previewLogo(n) {
+  const url = document.getElementById('logo' + n).value;
+  const prev = document.getElementById('logoPrev' + n);
+  if (url) {
+    prev.innerHTML = `<img src="${url}" alt="Logo ${n}">`;
+  } else {
+    prev.innerHTML = '';
+  }
+}
+
+function updateLogoSize(val) {
+  logoSize = parseInt(val);
+  document.getElementById('logoSizeVal').textContent = val + 'px';
+  // Live update on site
+  document.querySelectorAll('.marquee-track img').forEach(img => {
+    img.style.height = val + 'px';
+  });
+}
+
+function renderSiteLogos(urls, size) {
+  const track = document.querySelector('.marquee-track');
+  track.innerHTML = '';
+  // Repeat logos enough times to fill the marquee (6x)
+  for (let r = 0; r < 6; r++) {
+    urls.forEach(url => {
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = 'Client Evan Visions';
+      img.style.height = (size || 90) + 'px';
+      track.appendChild(img);
+    });
+  }
+}
+
+function loadLogos() {
+  if (!firebaseReady || !db) {
+    renderSiteLogos(DEFAULT_LOGOS, 90);
+    return;
+  }
+  db.ref('logos').once('value').then(snap => {
+    const data = snap.val();
+    if (data && data.urls && data.urls.length) {
+      logoSize = data.size || 90;
+      renderSiteLogos(data.urls, logoSize);
+    } else {
+      renderSiteLogos(DEFAULT_LOGOS, 90);
+    }
+  }).catch(() => renderSiteLogos(DEFAULT_LOGOS, 90));
+}
+
+// ============================================
 // LOAD VIDEOS FROM FIREBASE → SITE + DASHBOARD
 // ============================================
 function loadVideos() {
@@ -625,10 +767,15 @@ function tryLogin() {
 
 function loadDashboard() {
   document.getElementById('adminGrid').innerHTML = '';
+  document.getElementById('adminLogoGrid').innerHTML = '';
   videoCount = 0;
+  logoCount = 0;
 
   if (!firebaseReady) {
     DEFAULT_VIDEOS.forEach((url, i) => createVideoSlot(i + 1, url));
+    DEFAULT_LOGOS.forEach((url, i) => createLogoSlot(i + 1, url));
+    document.getElementById('logoSizeSlider').value = 90;
+    document.getElementById('logoSizeVal').textContent = '90px';
     setStatus('⚠️ Firebase non configuré — mode local', 'error');
     return;
   }
@@ -639,6 +786,18 @@ function loadDashboard() {
     urls.forEach((url, i) => createVideoSlot(i + 1, url));
   }).catch(() => {
     DEFAULT_VIDEOS.forEach((url, i) => createVideoSlot(i + 1, url));
+  });
+
+  db.ref('logos').once('value').then(snap => {
+    const data = snap.val();
+    const urls = (data && data.urls && data.urls.length) ? data.urls : DEFAULT_LOGOS;
+    const size = (data && data.size) ? data.size : 90;
+    urls.forEach((url, i) => createLogoSlot(i + 1, url));
+    document.getElementById('logoSizeSlider').value = size;
+    document.getElementById('logoSizeVal').textContent = size + 'px';
+    logoSize = size;
+  }).catch(() => {
+    DEFAULT_LOGOS.forEach((url, i) => createLogoSlot(i + 1, url));
   });
 }
 
@@ -659,20 +818,31 @@ function saveVideos() {
     return;
   }
 
-  const urls = [];
-  const inputs = document.querySelectorAll('#adminGrid .admin-video-input');
-  inputs.forEach(input => {
-    if (input.value.trim()) urls.push(input.value.trim());
+  // Save videos
+  const vidUrls = [];
+  document.querySelectorAll('#adminGrid .admin-video-input').forEach(input => {
+    if (input.value.trim()) vidUrls.push(input.value.trim());
   });
-
-  if (urls.length === 0) {
+  if (vidUrls.length === 0) {
     setStatus('⚠️ Ajoutez au moins une vidéo', 'error');
     return;
   }
 
-  db.ref('videos').set({ urls: urls }).then(() => {
-    setStatus('✓ ' + urls.length + ' vidéo(s) sauvegardée(s) ! Site mis à jour.', 'success');
-    renderSiteVideos(urls);
+  // Save logos
+  const logoUrls = [];
+  document.querySelectorAll('#adminLogoGrid .admin-video-input').forEach(input => {
+    if (input.value.trim()) logoUrls.push(input.value.trim());
+  });
+
+  const saves = [
+    db.ref('videos').set({ urls: vidUrls }),
+    db.ref('logos').set({ urls: logoUrls.length ? logoUrls : DEFAULT_LOGOS, size: logoSize })
+  ];
+
+  Promise.all(saves).then(() => {
+    setStatus('✓ ' + vidUrls.length + ' vidéo(s) + ' + logoUrls.length + ' logo(s) sauvegardés !', 'success');
+    renderSiteVideos(vidUrls);
+    renderSiteLogos(logoUrls.length ? logoUrls : DEFAULT_LOGOS, logoSize);
     setTimeout(() => setStatus(''), 4000);
   }).catch(err => {
     setStatus('Erreur: ' + err.message, 'error');
@@ -681,13 +851,23 @@ function saveVideos() {
 
 function resetVideos() {
   document.getElementById('adminGrid').innerHTML = '';
+  document.getElementById('adminLogoGrid').innerHTML = '';
   videoCount = 0;
+  logoCount = 0;
   DEFAULT_VIDEOS.forEach((url, i) => createVideoSlot(i + 1, url));
+  DEFAULT_LOGOS.forEach((url, i) => createLogoSlot(i + 1, url));
+  logoSize = 90;
+  document.getElementById('logoSizeSlider').value = 90;
+  document.getElementById('logoSizeVal').textContent = '90px';
 
   if (firebaseReady) {
-    db.ref('videos').set({ urls: DEFAULT_VIDEOS }).then(() => {
-      setStatus('✓ Vidéos réinitialisées (4 par défaut).', 'success');
+    Promise.all([
+      db.ref('videos').set({ urls: DEFAULT_VIDEOS }),
+      db.ref('logos').set({ urls: DEFAULT_LOGOS, size: 90 })
+    ]).then(() => {
+      setStatus('✓ Vidéos + logos réinitialisés par défaut.', 'success');
       renderSiteVideos(DEFAULT_VIDEOS);
+      renderSiteLogos(DEFAULT_LOGOS, 90);
       setTimeout(() => setStatus(''), 4000);
     });
   }
@@ -735,8 +915,9 @@ function toggleFaq(el) {
   if (!isOpen) { item.classList.add('open'); ans.style.maxHeight = ans.scrollHeight + 'px'; }
 }
 
-// Load videos from Firebase (or defaults)
+// Load videos + logos from Firebase (or defaults)
 loadVideos();
+loadLogos();
 
 // Open admin if ?admin in URL
 if (window.location.search.includes('admin')) {
