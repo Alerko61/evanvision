@@ -41,6 +41,27 @@ html, body{
   flex-direction: column;
 }
 
+/* ---- Desktop adaptation : l'outil devient une carte centrée plutôt qu'une page mobile étirée ---- */
+@media (min-width: 640px){
+  body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .app{
+    max-width: 480px;
+    width: 100%;
+    min-height: auto;
+    margin: 40px auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    padding: 32px 36px 36px;
+    box-shadow: 0 40px 100px -30px rgba(0,0,0,0.7);
+  }
+}
+
 /* ---- Top chrome ---- */
 .topbar{
   display:flex;
@@ -67,6 +88,8 @@ html, body{
   align-items:center;
   gap: 8px;
   margin-left:auto;
+  text-decoration: none;
+  cursor: pointer;
 }
 .brand-badge{
   width: 26px;
@@ -441,10 +464,10 @@ html, body{
   <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
   <div class="topbar">
     <button type="button" class="back-btn" id="backBtn">←</button>
-    <div class="brand-mini">
+    <a href="https://evanvisions.com" target="_blank" rel="noopener" class="brand-mini">
       <div class="brand-badge">EV</div>
       <div class="brand-wordmark">Evan Visions</div>
-    </div>
+    </a>
   </div>
 
   <div class="stage" id="stage"></div>
