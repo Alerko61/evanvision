@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Estimation de projet — Evan Visions</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@700&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root{
+  --bg: #0A0A0B;
+  --surface: #151517;
+  --surface-2: #1D1D20;
+  --line: #2C2C30;
+  --text: #F5F4F0;
+  --muted: #8E8E93;
+  --accent: #D1A85E;
+  --accent-text: #14120C;
+  --success: #D1A85E;
+  --radius: 999px;
+  --radius-card: 20px;
+}
+
+*{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body{
+  margin:0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+.app{
+  max-width: 460px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 18px 20px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Top chrome ---- */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 18px;
+  min-height: 32px;
+}
+.back-btn{
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 18px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.brand-mini{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  margin-left:auto;
+}
+.brand-badge{
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.brand-wordmark{
+  font-family:'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+.progress{
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.progress-fill{
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+/* ---- Stage ---- */
+.stage{
+  flex: 1;
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn{
+  from{ opacity: 0; transform: translateY(6px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+.question{
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.28;
+  margin: 4px 0 6px;
+}
+.question::before{
+  content: '✦ ';
+  color: var(--accent);
+}
+.question-sub{
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0 0 20px;
+}
+
+/* ---- Choice cards ---- */
+.group-label{
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  font-weight: 700;
+  margin: 20px 0 8px;
+}
+.group-label:first-of-type{ margin-top: 4px; }
+
+.choice-card{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-card);
+  margin-bottom: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.choice-card:active{ background: var(--surface-2); }
+.choice-card.selected{
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+.choice-card .check{
+  margin-left: auto;
+  opacity: 0;
+  color: var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.choice-card.selected .check{ opacity: 1; }
+.opt-price-tag{
+  margin-left: auto;
+  font-family:'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  flex-shrink: 0;
+  padding-left: 8px;
+}
+.choice-card.selected .opt-price-tag{ color: var(--success); }
+
+/* ---- Mode picker ---- */
+.mode-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+.mode-card{
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 28px 12px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+}
+.mode-card:active{ background: var(--surface-2); }
+.mode-card .emoji{
+  font-size: 34px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* ---- Segmented toggle ---- */
+.segmented{
+  display:flex;
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 28px;
+}
+.segmented button{
+  flex:1;
+  padding: 11px;
+  min-height: 42px;
+  border:none;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family:'Inter', sans-serif;
+}
+.segmented button.active{
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ---- Stepper ---- */
+.stepper{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 26px;
+  margin: 26px 0 4px;
+}
+.stepper-btn{
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  color: var(--text);
+  font-size: 26px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 400;
+  line-height: 1;
+}
+.stepper-btn:active{ background: var(--accent); border-color: var(--accent); color:#fff; }
+.stepper-value{
+  font-family:'Space Mono', monospace;
+  font-size: 38px;
+  font-weight: 700;
+  min-width: 90px;
+  text-align: center;
+  color: var(--text);
+}
+.stepper-unit{
+  text-align:center;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 6px 0 24px;
+}
+.duration-convert{
+  text-align:center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--success);
+  margin: -14px 0 20px;
+}
+
+/* ---- Buttons ---- */
+.btn-primary{
+  display:block;
+  width: 100%;
+  padding: 16px;
+  min-height: 52px;
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: var(--radius);
+  font-family:'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  text-align:center;
+  text-decoration:none;
+}
+.btn-primary:active{ background: #B8925A; }
+.btn-secondary{
+  display:block;
+  width: 100%;
+  padding: 14px;
+  min-height: 48px;
+  background: transparent;
+  color: var(--muted);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  font-family:'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  text-align:center;
+}
+
+/* ---- Final screen ---- */
+.final-hero{
+  text-align:center;
+  padding: 10px 0 4px;
+}
+.final-label{
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.final-price{
+  font-family:'Space Mono', monospace;
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--success);
+  line-height: 1.15;
+  word-break: break-word;
+}
+@media (min-width: 380px){
+  .final-price{ font-size: 44px; }
+}
+.final-sub{
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.final-note{
+  text-align:center;
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 12px;
+  line-height: 1.5;
+}
+.detail-toggle{
+  text-align:center;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: underline;
+  margin-top: 22px;
+  cursor: pointer;
+}
+.detail-box{
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border-radius: 12px;
+  font-size: 12.5px;
+}
+.d-row{
+  display:flex;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 6px 0;
+  color: var(--muted);
+  font-family:'Space Mono', monospace;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--line);
+}
+.d-row:last-child{ border-bottom: none; }
+.d-row span:first-child{ flex-shrink: 0; }
+.d-row span:last-child{ color: var(--text); text-align: right; }
+
+.recap-box{
+  margin-top: 22px;
+  padding: 16px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+}
+.recap-title{
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.evan-note{
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--surface-2);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.evan-signature{
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.restart-link{
+  text-align:center;
+  margin-top: 22px;
+  font-size: 12.5px;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.portfolio-link-final{
+  display:block;
+  text-align:center;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.portfolio-link-final:hover{ text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="topbar">
+    <button type="button" class="back-btn" id="backBtn">←</button>
+    <div class="brand-mini">
+      <div class="brand-badge">EV</div>
+      <div class="brand-wordmark">Evan Visions</div>
+    </div>
+  </div>
+
+  <div class="stage" id="stage"></div>
+</div>
+
+<script>
+/* ============================================================
+   DONNÉES — tarifs calés sur des fourchettes marché françaises
+   ============================================================ */
+
+const VIDEO_TYPES = [
+  { value:'wedding',      label:'Mariage',                                 group:'Événements privés',      dayRate:1800, unitRate:250 },
+  { value:'baptism',      label:'Baptême / communion',                     group:'Événements privés',      dayRate:600,  unitRate:100 },
+  { value:'birthday',     label:'Anniversaire / fête privée',              group:'Événements privés',      dayRate:450,  unitRate:100 },
+  { value:'evjf',         label:'EVJF / EVG',                              group:'Événements privés',      dayRate:500,  unitRate:100 },
+  { value:'brand',        label:'Film de marque',                          group:'Marques & entreprises',  dayRate:650,  unitRate:120 },
+  { value:'ad',           label:'Spot publicitaire',                       group:'Marques & entreprises',  dayRate:850,  unitRate:150 },
+  { value:'corporate',    label:'Vidéo institutionnelle / entreprise',     group:'Marques & entreprises',  dayRate:600,  unitRate:120 },
+  { value:'event_corp',   label:'Captation événementielle',                group:'Marques & entreprises',  dayRate:700,  unitRate:120 },
+  { value:'training',     label:'Vidéo de formation / e-learning',         group:'Marques & entreprises',  dayRate:500,  unitRate:100 },
+  { value:'product',      label:'Vidéo produit / e-commerce',              group:'Marques & entreprises',  dayRate:450,  unitRate:100 },
+  { value:'real_estate',  label:'Vidéo immobilière',                       group:'Marques & entreprises',  dayRate:500,  unitRate:80  },
+  { value:'portrait',     label:'Portrait / interview professionnel',      group:'Marques & entreprises',  dayRate:500,  unitRate:100 },
+  { value:'social',       label:'Contenu réseaux sociaux',                 group:'Créatif & réseaux',      dayRate:400,  unitRate:100 },
+  { value:'music_clip',   label:'Clip musique',                            group:'Créatif & réseaux',      dayRate:750,  unitRate:150 },
+  { value:'sports_event', label:'Vidéo sportive / compétition',            group:'Créatif & réseaux',      dayRate:600,  unitRate:120 },
+  { value:'show',         label:'Captation spectacle / concert',           group:'Créatif & réseaux',      dayRate:650,  unitRate:120 },
+  { value:'drone_only',   label:'Vidéo drone seule',                       group:'Créatif & réseaux',      dayRate:350,  unitRate:80  },
+  { value:'other',        label:'Autre projet / sur-mesure',               group:'Autre',                  dayRate:550,  unitRate:120 },
+];
+
+const PHOTO_TYPES = [
+  { value:'wedding',      label:'Mariage',                                 group:'Événements privés',      dayRate:2000, unitRate:12 },
+  { value:'baptism',      label:'Baptême / communion',                     group:'Événements privés',      dayRate:500,  unitRate:8  },
+  { value:'birthday',     label:'Anniversaire / fête privée',              group:'Événements privés',      dayRate:350,  unitRate:6  },
+  { value:'evjf',         label:'EVJF / EVG',                              group:'Événements privés',      dayRate:400,  unitRate:6  },
+  { value:'family',       label:'Séance famille / nouveau-né',             group:'Événements privés',      dayRate:450,  unitRate:10 },
+  { value:'corporate',    label:'Portrait corporate / trombinoscope',      group:'Marques & entreprises',  dayRate:650,  unitRate:15 },
+  { value:'event_corp',   label:'Événementiel entreprise',                 group:'Marques & entreprises',  dayRate:600,  unitRate:8  },
+  { value:'product',      label:'Produit / e-commerce',                    group:'Marques & entreprises',  dayRate:500,  unitRate:10 },
+  { value:'real_estate',  label:'Immobilier',                              group:'Marques & entreprises',  dayRate:400,  unitRate:8  },
+  { value:'portrait',     label:'Portrait individuel / personal branding', group:'Créatif & personnel',    dayRate:700,  unitRate:15 },
+  { value:'book',         label:'Book photo / mode',                       group:'Créatif & personnel',    dayRate:900,  unitRate:18 },
+  { value:'sports_event', label:'Sportif / compétition',                   group:'Créatif & personnel',    dayRate:500,  unitRate:8  },
+  { value:'other',        label:'Autre projet / sur-mesure',               group:'Autre',                  dayRate:500,  unitRate:10 },
+];
+
+const VIDEO_OPTIONS = [
+  { key:'drone',            label:'Drone (vues aériennes)',                price:150, requiresShoot:true },
+  { key:'cam360',           label:'Caméra 360° immersive',                 price:120, requiresShoot:true },
+  { key:'sound',            label:'Sound design sur-mesure',               price:100, requiresPost:true },
+  { key:'travel',           label:'Déplacement +100 km',                   price:150, requiresShoot:true },
+  { key:'same_day',         label:'Montage "same day edit"',               price:350, requiresShoot:true, requiresPost:true,
+    types:['wedding','baptism','birthday','evjf','event_corp','show','sports_event'] },
+  { key:'live_stream',      label:'Diffusion en direct pour les absents',  price:250, requiresShoot:true,
+    types:['wedding','baptism','birthday','evjf','event_corp','show','sports_event'] },
+  { key:'guest_interviews', label:'Messages vidéo des invités',            price:150, requiresShoot:true,
+    types:['wedding','baptism','birthday','evjf','event_corp'] },
+  { key:'usb_box',          label:'Coffret souvenir (clé USB gravée)',     price:60,
+    types:['wedding','baptism','birthday','evjf'] },
+  { key:'vertical_bonus',   label:'Version verticale bonus (Stories)',     price:80,  requiresPost:true,
+    types:['wedding','baptism','birthday','evjf','social','music_clip','sports_event','show','brand','ad','event_corp','product'] },
+  { key:'time_capsule',     label:'Capsule temporelle (envoi différé)',    price:40,
+    types:['wedding','baptism','birthday','evjf'] },
+  { key:'express',          label:'Livraison express (48h)',               price:80  },
+  { key:'rush',             label:'Tournage urgent (< 1 sem.)',            price:0, percent:20 },
+];
+
+const PHOTO_OPTIONS = [
+  { key:'drone',          label:'Drone (vues aériennes)',            price:150, requiresShoot:true },
+  { key:'studio',         label:'Location studio professionnel',     price:100, requiresShoot:true,
+    types:['portrait','book','corporate','product','family'] },
+  { key:'prints',         label:'Tirages papier + album photo',      price:150, requiresPost:true,
+    types:['wedding','baptism','birthday','evjf','family','portrait','book'] },
+  { key:'mua',            label:'Maquillage & coiffure (MUA)',       price:120, requiresShoot:true,
+    types:['wedding','baptism','birthday','evjf','portrait','book','family'] },
+  { key:'express',        label:'Livraison express (48h)',           price:80  },
+  { key:'travel',         label:'Déplacement +100 km',               price:150, requiresShoot:true },
+  { key:'rush',           label:'Séance urgente (< 1 sem.)',         price:0, percent:20 },
+];
+
+const USAGE_OPTIONS = [
+  { value:'private',       label:'Usage personnel / privé',              mult:0.9  },
+  { value:'organic',       label:'Réseaux sociaux (organique)',          mult:1.0  },
+  { value:'website',       label:"Site web / vitrine d'entreprise",      mult:1.15 },
+  { value:'internal',      label:'Interne entreprise / formation',       mult:1.0  },
+  { value:'paid',          label:'Publicité payante (ads en ligne)',     mult:1.4  },
+  { value:'broadcast',     label:'National / TV / affichage',            mult:1.9  },
+  { value:'international', label:'International / broadcast multi-pays',mult:2.3  },
+];
+
+const MODE_CONFIG = {
+  video: {
+    includedCount: 1,
+    noPostFactor: 0.45,
+    editOnlyFactor: 0.55,
+    countQuestion: 'Combien de vidéos finales ?',
+    countSub: 'Ex : 1 film long + 2 formats courts réseaux sociaux = 3.',
+    countLabel: 'vidéo(s) finale(s)',
+    countMin: 1, countMax: 8, countStep: 1,
+    serviceQuestion: 'Quelle prestation ?',
+    serviceFull: 'Tournage + montage',
+    serviceFullSub: "Je n'ai pas encore d'images, il me faut le tournage ET le montage.",
+    serviceShootOnly: 'Tournage seul',
+    serviceShootOnlySub: "Je n'ai pas encore d'images, il me faut juste le tournage (rushes bruts, sans montage).",
+    serviceEditOnly: 'Montage seul',
+    serviceEditOnlySub: "J'ai déjà mes rushs, je veux juste le montage.",
+    durationFullLabel: 'de tournage',
+    durationEditLabel: 'de rushs à monter',
+    durationFullDesc: "C'est le nombre d'heures pendant lesquelles je suis présent sur place pour filmer (installation et temps de battement compris).",
+    durationEditDesc: "Une estimation du volume de rushs que j'ai à monter — à titre de repère, une journée de tournage classique représente environ 8h de rushs.",
+  },
+  photo: {
+    includedCount: 15,
+    noPostFactor: 0.55,
+    editOnlyFactor: 1, // sans objet : le tarif "retouche seule" est calculé au photo, pas au temps
+    countQuestion: 'Combien de photos retouchées ?',
+    countSub: 'Les 15 premières photos sont incluses dans le tarif de base.',
+    countLabel: 'photo(s) retouchée(s)',
+    countMin: 5, countMax: 100, countStep: 5,
+    serviceQuestion: 'Quelle prestation ?',
+    serviceFull: 'Prise de vue + retouche',
+    serviceFullSub: "Je n'ai pas encore de photos, il me faut la séance ET la retouche.",
+    serviceShootOnly: 'Prise de vue seule',
+    serviceShootOnlySub: "Je n'ai pas encore de photos, il me faut juste la séance (fichiers RAW, sans retouche).",
+    serviceEditOnly: 'Retouche seule',
+    serviceEditOnlySub: "J'ai déjà mes photos, je veux juste la retouche.",
+    durationFullLabel: 'de séance',
+    durationEditLabel: '',
+    durationFullDesc: "C'est le nombre d'heures pendant lesquelles je suis présent sur place pour la séance photo.",
+    durationEditDesc: '',
+  },
+};
+
+const MIN_RETOUCH_FORFAIT = 40; // plancher pour une retouche photo seule, même sur un petit lot
+
+// Coefficient régional appliqué à tous les tarifs de base (dayRate/unitRate).
+// Evan exerce en Auvergne-Rhône-Alpes : les tarifs moyens en France sont ~15-25% en dessous
+// de ceux pratiqués à Paris. -10% est un ajustement médian, à affiner si besoin
+// (ex: 1 = tarifs Paris, 0.85-0.9 = grandes villes de région, 0.75-0.8 = zones rurales).
+const REGIONAL_FACTOR = 0.90;
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+function freshState(){
+  return {
+    mode: null,
+    service: 'full', // 'full' | 'shoot_only' | 'edit_only'
+    type: null,
+    hours: 8, // 8h = 1 jour de tournage/séance par défaut
+    count: 1,
+    usage: null,
+    options: new Set(),
+  };
+}
+let state = freshState();
+let currentStep = 'mode';
+let historyStack = [];
+
+const STEP_ORDER = ['mode','service','type','duration','count','usage','options','final'];
+
+function formatDuration(hours){
+  const days = Math.floor(hours / 8);
+  const rem = hours % 8;
+  if(days === 0) return hours + ' heure' + (hours > 1 ? 's' : '');
+  if(rem === 0) return days + ' jour' + (days > 1 ? 's' : '');
+  return days + ' jour' + (days > 1 ? 's' : '') + ' + ' + rem + ' heure' + (rem > 1 ? 's' : '');
+}
+
+function fmt(n){ return Math.round(n).toLocaleString('fr-FR'); }
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+const stage = document.getElementById('stage');
+const backBtn = document.getElementById('backBtn');
+const progressFill = document.getElementById('progressFill');
+
+function goTo(step){
+  historyStack.push(currentStep);
+  currentStep = step;
+  render();
+}
+function goBack(){
+  if(historyStack.length === 0) return;
+  currentStep = historyStack.pop();
+  render();
+}
+backBtn.addEventListener('click', goBack);
+
+function updateChrome(){
+  const idx = STEP_ORDER.indexOf(currentStep);
+  const pct = (idx / (STEP_ORDER.length - 1)) * 100;
+  progressFill.style.width = pct + '%';
+  backBtn.style.display = historyStack.length > 0 ? 'flex' : 'none';
+}
+
+function render(){
+  updateChrome();
+  switch(currentStep){
+    case 'mode': renderMode(); break;
+    case 'service': renderService(); break;
+    case 'type': renderType(); break;
+    case 'duration': renderDuration(); break;
+    case 'count': renderCount(); break;
+    case 'usage': renderUsage(); break;
+    case 'options': renderOptions(); break;
+    case 'final': renderFinal(); break;
+  }
+}
+
+/* ============================================================
+   STEP: MODE
+   ============================================================ */
+
+function renderMode(){
+  stage.innerHTML = `
+    <h2 class="question">Vidéo ou photo ?</h2>
+    <p class="question-sub">Deux minutes pour une estimation, aucun engagement.</p>
+    <div class="mode-grid">
+      <div class="mode-card ${state.mode==='video'?'selected':''}" data-mode="video"><span class="emoji">🎥</span>Vidéo</div>
+      <div class="mode-card ${state.mode==='photo'?'selected':''}" data-mode="photo"><span class="emoji">📷</span>Photo</div>
+    </div>
+  `;
+  stage.querySelectorAll('.mode-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const newMode = card.dataset.mode;
+      if(newMode !== state.mode){
+        state = freshState();
+        state.mode = newMode;
+        state.count = MODE_CONFIG[newMode].includedCount === 1 ? 1 : 20;
+      }
+      goTo('service');
+    });
+  });
+}
+
+/* ============================================================
+   STEP: SERVICE (prestation complète ou montage/retouche seul)
+   ============================================================ */
+
+function renderService(){
+  const cfg = MODE_CONFIG[state.mode];
+  stage.innerHTML = `
+    <h2 class="question">${cfg.serviceQuestion}</h2>
+    <div class="choice-card ${state.service==='full'?'selected':''}" data-val="full">
+      <span>${cfg.serviceFull}<br><span style="font-weight:400;font-size:12.5px;color:var(--muted);">${cfg.serviceFullSub}</span></span>
+      <span class="check">✓</span>
+    </div>
+    <div class="choice-card ${state.service==='shoot_only'?'selected':''}" data-val="shoot_only">
+      <span>${cfg.serviceShootOnly}<br><span style="font-weight:400;font-size:12.5px;color:var(--muted);">${cfg.serviceShootOnlySub}</span></span>
+      <span class="check">✓</span>
+    </div>
+    <div class="choice-card ${state.service==='edit_only'?'selected':''}" data-val="edit_only">
+      <span>${cfg.serviceEditOnly}<br><span style="font-weight:400;font-size:12.5px;color:var(--muted);">${cfg.serviceEditOnlySub}</span></span>
+      <span class="check">✓</span>
+    </div>
+  `;
+  stage.querySelectorAll('.choice-card').forEach(card => {
+    card.addEventListener('click', () => {
+      state.service = card.dataset.val;
+      goTo('type');
+    });
+  });
+}
+
+/* ============================================================
+   STEP: TYPE
+   ============================================================ */
+
+function renderType(){
+  const types = state.mode === 'video' ? VIDEO_TYPES : PHOTO_TYPES;
+  const groups = [...new Set(types.map(t => t.group))];
+  let html = `<h2 class="question">Quel est ton projet ?</h2>`;
+  groups.forEach(g => {
+    html += `<div class="group-label">${g}</div>`;
+    types.filter(t => t.group === g).forEach(t => {
+      html += `<div class="choice-card ${state.type===t.value?'selected':''}" data-value="${t.value}">${t.label}<span class="check">✓</span></div>`;
+    });
+  });
+  stage.innerHTML = html;
+  stage.querySelectorAll('.choice-card').forEach(card => {
+    card.addEventListener('click', () => {
+      state.type = card.dataset.value;
+      if(state.mode === 'photo' && state.service === 'edit_only'){
+        goTo('count'); // retouche seule photo : pas de séance à chiffrer, on charge au nombre de photos
+      } else {
+        goTo('duration');
+      }
+    });
+  });
+}
+
+/* ============================================================
+   STEP: DURATION
+   ============================================================ */
+
+function renderDuration(){
+  const cfg = MODE_CONFIG[state.mode];
+  const label = state.service === 'edit_only' ? cfg.durationEditLabel : cfg.durationFullLabel;
+  const desc = state.service === 'edit_only' ? cfg.durationEditDesc : cfg.durationFullDesc;
+  stage.innerHTML = `
+    <h2 class="question">Combien d'heures ${label} ?</h2>
+    <p class="question-sub">💡 ${desc}</p>
+    <div class="stepper">
+      <button type="button" class="stepper-btn" id="stepMinus">–</button>
+      <div class="stepper-value" id="stepValue">${state.hours}</div>
+      <button type="button" class="stepper-btn" id="stepPlus">+</button>
+    </div>
+    <div class="stepper-unit">heure(s)</div>
+    <p class="duration-convert" id="durationConvert">≈ ${formatDuration(state.hours)}</p>
+    <button type="button" class="btn-primary" id="nextBtn">Suivant</button>
+  `;
+
+  function updateDisplay(){
+    document.getElementById('stepValue').textContent = state.hours;
+    document.getElementById('durationConvert').textContent = '≈ ' + formatDuration(state.hours);
+  }
+
+  document.getElementById('stepPlus').addEventListener('click', () => {
+    state.hours = Math.min(40, state.hours + 1);
+    updateDisplay();
+  });
+  document.getElementById('stepMinus').addEventListener('click', () => {
+    state.hours = Math.max(1, state.hours - 1);
+    updateDisplay();
+  });
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    goTo(state.service === 'shoot_only' ? 'usage' : 'count');
+  });
+}
+
+/* ============================================================
+   STEP: COUNT (livrables / photos)
+   ============================================================ */
+
+function renderCount(){
+  const cfg = MODE_CONFIG[state.mode];
+  stage.innerHTML = `
+    <h2 class="question">${cfg.countQuestion}</h2>
+    <p class="question-sub">${cfg.countSub}</p>
+    <div class="stepper">
+      <button type="button" class="stepper-btn" id="cMinus">–</button>
+      <div class="stepper-value" id="cValue">${state.count}</div>
+      <button type="button" class="stepper-btn" id="cPlus">+</button>
+    </div>
+    <div class="stepper-unit">${cfg.countLabel}</div>
+    <button type="button" class="btn-primary" id="nextBtn">Suivant</button>
+  `;
+  document.getElementById('cPlus').addEventListener('click', () => {
+    state.count = Math.min(cfg.countMax, state.count + cfg.countStep);
+    document.getElementById('cValue').textContent = state.count;
+  });
+  document.getElementById('cMinus').addEventListener('click', () => {
+    state.count = Math.max(cfg.countMin, state.count - cfg.countStep);
+    document.getElementById('cValue').textContent = state.count;
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => goTo('usage'));
+}
+
+/* ============================================================
+   STEP: USAGE
+   ============================================================ */
+
+function renderUsage(){
+  let html = `<h2 class="question">Usage prévu des images ?</h2>`;
+  USAGE_OPTIONS.forEach(u => {
+    html += `<div class="choice-card ${state.usage===u.value?'selected':''}" data-val="${u.value}">${u.label}<span class="check">✓</span></div>`;
+  });
+  stage.innerHTML = html;
+  stage.querySelectorAll('.choice-card').forEach(card => {
+    card.addEventListener('click', () => {
+      state.usage = card.dataset.val;
+      goTo('options');
+    });
+  });
+}
+
+/* ============================================================
+   STEP: OPTIONS
+   ============================================================ */
+
+function renderOptions(){
+  const allOpts = state.mode === 'video' ? VIDEO_OPTIONS : PHOTO_OPTIONS;
+  let opts = allOpts;
+  if(state.service === 'edit_only') opts = opts.filter(o => !o.requiresShoot);
+  if(state.service === 'shoot_only') opts = opts.filter(o => !o.requiresPost);
+  // Ne garder que les options pertinentes pour le type de projet choisi (une option
+  // sans liste "types" est considérée universelle ; "other" voit tout, faute de mieux)
+  opts = opts.filter(o => !o.types || state.type === 'other' || o.types.includes(state.type));
+  let html = `<h2 class="question">Des options en plus ?</h2><p class="question-sub">Sélectionne tout ce qui t'intéresse, ou passe directement à l'estimation.</p>`;
+  opts.forEach(o => {
+    const priceLabel = o.percent ? `+${o.percent}%` : `+${o.price} €`;
+    html += `<div class="choice-card ${state.options.has(o.key)?'selected':''}" data-key="${o.key}">${o.label}<span class="opt-price-tag">${priceLabel}</span></div>`;
+  });
+  html += `<button type="button" class="btn-primary" id="nextBtn">Voir mon estimation</button>`;
+  stage.innerHTML = html;
+  stage.querySelectorAll('.choice-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const key = card.dataset.key;
+      if(state.options.has(key)){ state.options.delete(key); card.classList.remove('selected'); }
+      else { state.options.add(key); card.classList.add('selected'); }
+    });
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => goTo('final'));
+}
+
+/* ============================================================
+   PRICE COMPUTATION
+   ============================================================ */
+
+function computePrice(){
+  const isVideo = state.mode === 'video';
+  const types = isVideo ? VIDEO_TYPES : PHOTO_TYPES;
+  const proj = types.find(t => t.value === state.type);
+  const cfg = MODE_CONFIG[state.mode];
+  // Coefficient régional : Evan exerce en Auvergne-Rhône-Alpes, pas à Paris.
+  // Les tarifs journaliers moyens en France sont ~15-25% plus bas qu'à Paris ;
+  // on applique -10% aux tarifs de base pour rester cohérent avec le marché régional.
+  const dayRate = proj.dayRate * REGIONAL_FACTOR;
+  const unitRate = proj.unitRate * REGIONAL_FACTOR;
+  const hourlyRate = dayRate / 8;
+  const timeCost = state.hours * hourlyRate;
+
+  let base = 0;
+  let extra = 0;
+
+  if(state.service === 'edit_only'){
+    if(isVideo){
+      // Montage seul : le temps saisi représente le volume de rushs à monter, pas un tournage
+      base = timeCost * cfg.editOnlyFactor;
+      extra = Math.max(0, state.count - cfg.includedCount) * unitRate;
+    } else {
+      // Retouche seule : pas de séance à chiffrer, tarif au nombre de photos avec un plancher
+      base = 0;
+      extra = Math.max(state.count * unitRate, MIN_RETOUCH_FORFAIT * REGIONAL_FACTOR);
+    }
+  } else if(state.service === 'shoot_only'){
+    // Tournage/prise de vue seul(e), pas de montage : aucun coût de livrable additionnel
+    base = timeCost * cfg.noPostFactor;
+    extra = 0;
+  } else {
+    // Prestation complète : tournage/séance + montage/retouche inclus
+    base = timeCost;
+    extra = Math.max(0, state.count - cfg.includedCount) * unitRate;
+  }
+
+  const usageObj = USAGE_OPTIONS.find(u => u.value === state.usage);
+  const subtotal = (base + extra) * usageObj.mult;
+
+  const opts = isVideo ? VIDEO_OPTIONS : PHOTO_OPTIONS;
+  let optionsTotal = 0;
+  let rush = false;
+  state.options.forEach(key => {
+    const opt = opts.find(o => o.key === key);
+    if(opt.percent){ rush = true; }
+    else { optionsTotal += opt.price; }
+  });
+
+  let total = subtotal + optionsTotal;
+  if(rush){ total *= 1.2; }
+
+  return {
+    low: total * 0.85,
+    high: total * 1.15,
+    base, extra, usageObj, optionsTotal, rush, proj, total,
+  };
+}
+
+/* ============================================================
+   STEP: FINAL
+   ============================================================ */
+
+function buildRecapItems(r){
+  const isVideo = state.mode === 'video';
+  const cfg = MODE_CONFIG[state.mode];
+  const opts = isVideo ? VIDEO_OPTIONS : PHOTO_OPTIONS;
+  const checkedOptions = Array.from(state.options).map(key => opts.find(o => o.key === key).label).join(', ') || 'Aucune';
+  const durationLabel = formatDuration(state.hours);
+  const serviceLabel = state.service === 'full' ? cfg.serviceFull
+    : state.service === 'shoot_only' ? cfg.serviceShootOnly
+    : cfg.serviceEditOnly;
+
+  const showDuration = state.service !== 'edit_only' || isVideo;
+  const showCount = state.service !== 'shoot_only';
+
+  const items = [
+    { label: 'Prestation', value: serviceLabel },
+    { label: 'Type de projet', value: r.proj.label },
+  ];
+  if(showDuration){
+    items.push({ label: state.service === 'edit_only' ? 'Volume de rushs' : 'Durée', value: durationLabel });
+  }
+  if(showCount){
+    items.push({ label: isVideo ? 'Livrables souhaités' : 'Photos retouchées', value: state.count });
+  }
+  items.push({ label: 'Usage prévu', value: r.usageObj.label });
+  items.push({ label: 'Options', value: checkedOptions });
+  return items;
+}
+
+function buildWaMessage(r){
+  const isVideo = state.mode === 'video';
+  const items = buildRecapItems(r);
+  const lines = items.map(i => `- ${i.label} : ${i.value}`).join('\n');
+
+  return encodeURIComponent(
+`Bonjour Evan,
+
+Voici les infos de mon projet ${isVideo ? 'vidéo' : 'photo'} :
+${lines}
+
+Estimation obtenue sur le configurateur : ${fmt(r.low)} € – ${fmt(r.high)} €
+
+Merci de me recontacter pour affiner le devis.`
+  );
+}
+
+function renderFinal(){
+  const r = computePrice();
+  const waMessage = buildWaMessage(r);
+  const recapItems = buildRecapItems(r);
+  const isVideo = state.mode === 'video';
+  const editOnly = state.service === 'edit_only';
+  const shootOnly = state.service === 'shoot_only';
+  const baseLabel = isVideo
+    ? (editOnly ? 'Base montage (volume de rushs)' : shootOnly ? 'Base tournage seul' : 'Base tournage')
+    : (editOnly ? 'Base retouche' : shootOnly ? 'Base séance seule' : 'Base séance');
+  const extraLabel = isVideo ? 'Livrables additionnels' : 'Photos retouchées';
+  const showExtraRow = !shootOnly;
+
+  const recapHtml = recapItems.map(i => `<div class="d-row"><span>${i.label}</span><span>${i.value}</span></div>`).join('');
+
+  stage.innerHTML = `
+    <div class="final-hero">
+      <div class="final-label">Ton estimation</div>
+      <div class="final-price">${fmt(r.low)} – ${fmt(r.high)} €</div>
+      <div class="final-sub">fourchette indicative avant échange détaillé</div>
+    </div>
+
+    <div class="recap-box">
+      <div class="recap-title">📋 Récap de ton projet</div>
+      ${recapHtml}
+    </div>
+
+    <div class="evan-note">
+      🎬 On se lance ? Je réponds personnellement à chaque message sous 24h pour affiner ce devis à ton projet exact. Plus tôt tu me contactes, plus vite on peut caler ta date.
+      <div class="evan-signature">— Evan</div>
+    </div>
+
+    <a class="btn-primary" id="waBtn" href="https://wa.me/33781325185?text=${waMessage}" target="_blank" rel="noopener">💬 Contacter Evan sur WhatsApp</a>
+    <div class="final-note">📱 Réponse sous 24h en général · TVA non applicable, art. 293 B du CGI</div>
+    <div class="detail-toggle" id="detailToggle">Voir le détail du calcul</div>
+    <div class="detail-box" id="detailBox" style="display:none">
+      <div class="d-row"><span>${baseLabel}</span><span>${fmt(r.base)} €</span></div>
+      ${showExtraRow ? `<div class="d-row"><span>${extraLabel}</span><span>${fmt(r.extra)} €</span></div>` : ''}
+      <div class="d-row"><span>Coefficient usage</span><span>x${r.usageObj.mult.toFixed(2)}</span></div>
+      <div class="d-row"><span>Options</span><span>${r.optionsTotal > 0 ? fmt(r.optionsTotal) + ' €' : '—'}${r.rush ? ' + urgence' : ''}</span></div>
+    </div>
+    <a class="portfolio-link-final" href="https://instagram.com/evanvisions" target="_blank" rel="noopener">Voir le portfolio →</a>
+    <div class="restart-link" id="restartLink">Recommencer une estimation</div>
+  `;
+
+  document.getElementById('detailToggle').addEventListener('click', () => {
+    const box = document.getElementById('detailBox');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  });
+  document.getElementById('restartLink').addEventListener('click', () => {
+    state = freshState();
+    historyStack = [];
+    currentStep = 'mode';
+    render();
+  });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+
+render();
+</script>
+
+</body>
+</html>
