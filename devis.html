@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Estimation de projet — Evan Visions</title>
+<title>Estimation de projet · Evan Visions</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@700&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
@@ -297,6 +297,23 @@ html, body{
   color: var(--muted);
   margin: 6px 0 24px;
 }
+.text-input{
+  width: 100%;
+  padding: 15px 16px;
+  min-height: 52px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-card);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+.text-input::placeholder{ color: var(--muted); }
+.text-input:focus{
+  outline: none;
+  border-color: var(--accent);
+}
 .duration-convert{
   text-align:center;
   font-size: 13px;
@@ -365,6 +382,12 @@ html, body{
 @media (min-width: 380px){
   .final-price{ font-size: 44px; }
 }
+.final-confirm{
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
 .final-sub{
   font-size: 12.5px;
   color: var(--muted);
@@ -431,6 +454,16 @@ html, body{
   line-height: 1.5;
   color: var(--text);
 }
+.disclaimer-box{
+  margin-top: 24px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
 .evan-signature{
   margin-top: 8px;
   font-size: 12px;
@@ -475,7 +508,7 @@ html, body{
 
 <script>
 /* ============================================================
-   DONNÉES — tarifs calés sur des fourchettes marché françaises
+   DONNÉES : tarifs calés sur des fourchettes marché françaises
    ============================================================ */
 
 const VIDEO_TYPES = [
@@ -520,8 +553,6 @@ const VIDEO_OPTIONS = [
   { key:'cam360',           label:'Caméra 360° immersive',                 price:120, requiresShoot:true },
   { key:'sound',            label:'Sound design sur-mesure',               price:100, requiresPost:true },
   { key:'travel',           label:'Déplacement +100 km',                   price:150, requiresShoot:true },
-  { key:'same_day',         label:'Montage "same day edit"',               price:350, requiresShoot:true, requiresPost:true,
-    types:['wedding','baptism','birthday','evjf','event_corp','show','sports_event'] },
   { key:'live_stream',      label:'Diffusion en direct pour les absents',  price:250, requiresShoot:true,
     types:['wedding','baptism','birthday','evjf','event_corp','show','sports_event'] },
   { key:'guest_interviews', label:'Messages vidéo des invités',            price:150, requiresShoot:true,
@@ -559,6 +590,21 @@ const USAGE_OPTIONS = [
   { value:'international', label:'International / broadcast multi-pays',mult:2.3  },
 ];
 
+// Palier de positionnement, demandé uniquement pour les projets "Marques & entreprises" :
+// un bijoutier/horloger haut de gamme et un petit artisan ébéniste n'ont ni le même budget,
+// ni la même valeur perçue à défendre, même pour un projet du même type.
+const POSITIONING_OPTIONS = [
+  { value:'artisan', label:'Artisan / petite structure indépendante', mult:0.85 },
+  { value:'pme',     label:'PME / entreprise déjà établie',           mult:1.0  },
+  { value:'premium', label:'Marque premium / haut de gamme',          mult:1.35 },
+];
+
+function typeNeedsPositioning(mode, typeValue){
+  const types = mode === 'video' ? VIDEO_TYPES : PHOTO_TYPES;
+  const t = types.find(x => x.value === typeValue);
+  return t && t.group === 'Marques & entreprises';
+}
+
 const MODE_CONFIG = {
   video: {
     includedCount: 1,
@@ -576,9 +622,9 @@ const MODE_CONFIG = {
     serviceEditOnly: 'Montage seul',
     serviceEditOnlySub: "J'ai déjà mes rushs, je veux juste le montage.",
     durationFullLabel: 'de tournage',
-    durationEditLabel: 'de rushs à monter',
+    durationEditLabel: 'de rushs par vidéo',
     durationFullDesc: "C'est le nombre d'heures pendant lesquelles je suis présent sur place pour filmer (installation et temps de battement compris).",
-    durationEditDesc: "Une estimation du volume de rushs que j'ai à monter — à titre de repère, une journée de tournage classique représente environ 8h de rushs.",
+    durationEditDesc: "C'est le volume de rushs que j'ai à trier et monter pour chaque vidéo, exprimé en heures.",
   },
   photo: {
     includedCount: 15,
@@ -619,6 +665,8 @@ function freshState(){
     mode: null,
     service: 'full', // 'full' | 'shoot_only' | 'edit_only'
     type: null,
+    positioning: 'pme',
+    sector: '',
     hours: 8, // 8h = 1 jour de tournage/séance par défaut
     count: 1,
     usage: null,
@@ -629,7 +677,7 @@ let state = freshState();
 let currentStep = 'mode';
 let historyStack = [];
 
-const STEP_ORDER = ['mode','service','type','duration','count','usage','options','final'];
+const STEP_ORDER = ['mode','service','type','positioning','sector','duration','count','usage','options','final'];
 
 function formatDuration(hours){
   const days = Math.floor(hours / 8);
@@ -640,6 +688,16 @@ function formatDuration(hours){
 }
 
 function fmt(n){ return Math.round(n).toLocaleString('fr-FR'); }
+
+// Arrondi "à la louche" pour la fourchette affichée en gros : volontairement peu précis pour
+// que le prospect le lise comme une idée générale et non un montant figé auquel s'accrocher.
+function roundRough(n){
+  if(n < 150) return Math.round(n / 5) * 5;
+  if(n < 500) return Math.round(n / 10) * 10;
+  if(n < 2000) return Math.round(n / 25) * 25;
+  return Math.round(n / 50) * 50;
+}
+function fmtRough(n){ return roundRough(n).toLocaleString('fr-FR'); }
 
 /* ============================================================
    NAVIGATION
@@ -674,6 +732,8 @@ function render(){
     case 'mode': renderMode(); break;
     case 'service': renderService(); break;
     case 'type': renderType(); break;
+    case 'positioning': renderPositioning(); break;
+    case 'sector': renderSector(); break;
     case 'duration': renderDuration(); break;
     case 'count': renderCount(); break;
     case 'usage': renderUsage(); break;
@@ -693,6 +753,9 @@ function renderMode(){
     <div class="mode-grid">
       <div class="mode-card ${state.mode==='video'?'selected':''}" data-mode="video"><span class="emoji">🎥</span>Vidéo</div>
       <div class="mode-card ${state.mode==='photo'?'selected':''}" data-mode="photo"><span class="emoji">📷</span>Photo</div>
+    </div>
+    <div class="disclaimer-box">
+      ℹ️ Cet outil ne calcule pas de prix : il rassemble les infos de ton projet pour que je te prépare un devis précis et personnalisé, sous 24h.
     </div>
   `;
   stage.querySelectorAll('.mode-card').forEach(card => {
@@ -741,6 +804,14 @@ function renderService(){
    STEP: TYPE
    ============================================================ */
 
+function goToAfterPositioning(){
+  if(state.mode === 'photo' && state.service === 'edit_only'){
+    goTo('count'); // retouche seule photo : pas de séance à chiffrer, on charge au nombre de photos
+  } else {
+    goTo('duration');
+  }
+}
+
 function renderType(){
   const types = state.mode === 'video' ? VIDEO_TYPES : PHOTO_TYPES;
   const groups = [...new Set(types.map(t => t.group))];
@@ -755,13 +826,47 @@ function renderType(){
   stage.querySelectorAll('.choice-card').forEach(card => {
     card.addEventListener('click', () => {
       state.type = card.dataset.value;
-      if(state.mode === 'photo' && state.service === 'edit_only'){
-        goTo('count'); // retouche seule photo : pas de séance à chiffrer, on charge au nombre de photos
+      if(typeNeedsPositioning(state.mode, state.type)){
+        goTo('positioning');
       } else {
-        goTo('duration');
+        goToAfterPositioning();
       }
     });
   });
+}
+
+/* ============================================================
+   STEP: POSITIONING (uniquement pour les projets marques & entreprises)
+   ============================================================ */
+
+function renderPositioning(){
+  let html = `<h2 class="question">Comment situerais-tu la marque ?</h2><p class="question-sub">Un bijoutier haut de gamme et un artisan indépendant n'ont pas le même budget ni la même valeur à défendre, même pour un projet similaire.</p>`;
+  POSITIONING_OPTIONS.forEach(p => {
+    html += `<div class="choice-card ${state.positioning===p.value?'selected':''}" data-val="${p.value}">${p.label}<span class="check">✓</span></div>`;
+  });
+  stage.innerHTML = html;
+  stage.querySelectorAll('.choice-card').forEach(card => {
+    card.addEventListener('click', () => {
+      state.positioning = card.dataset.val;
+      goTo('sector');
+    });
+  });
+}
+
+/* ============================================================
+   STEP: SECTOR (uniquement pour les projets marques & entreprises)
+   ============================================================ */
+
+function renderSector(){
+  stage.innerHTML = `
+    <h2 class="question">Dans quel secteur travailles-tu ?</h2>
+    <p class="question-sub">Ex : bijouterie, ébénisterie, restauration, cosmétique, artisanat du bâtiment...</p>
+    <input type="text" class="text-input" id="sectorInput" placeholder="Ton secteur d'activité" value="${state.sector}" maxlength="60">
+    <button type="button" class="btn-primary" id="nextBtn">Suivant</button>
+  `;
+  const input = document.getElementById('sectorInput');
+  input.addEventListener('input', () => { state.sector = input.value; });
+  document.getElementById('nextBtn').addEventListener('click', () => goToAfterPositioning());
 }
 
 /* ============================================================
@@ -914,13 +1019,19 @@ function computePrice(){
     base = timeCost * cfg.noPostFactor;
     extra = 0;
   } else {
-    // Prestation complète : tournage/séance + montage/retouche inclus
+    // Prestation complète : tournage/séance + montage/retouche inclus.
+    // Le montage/la retouche est facturé pour chaque livrable dès le premier
+    // (avant, le premier livrable était "inclus gratuitement" dans le tarif jour,
+    // ce qui sous-évaluait largement le temps de post-production réel).
     base = timeCost;
-    extra = Math.max(0, state.count - cfg.includedCount) * unitRate;
+    extra = state.count * unitRate;
   }
 
   const usageObj = USAGE_OPTIONS.find(u => u.value === state.usage);
-  const subtotal = (base + extra) * usageObj.mult;
+  const needsPositioning = typeNeedsPositioning(state.mode, state.type);
+  const positioningObj = needsPositioning ? POSITIONING_OPTIONS.find(p => p.value === state.positioning) : null;
+  const positioningMult = positioningObj ? positioningObj.mult : 1;
+  const subtotal = (base + extra) * usageObj.mult * positioningMult;
 
   const opts = isVideo ? VIDEO_OPTIONS : PHOTO_OPTIONS;
   let optionsTotal = 0;
@@ -937,7 +1048,7 @@ function computePrice(){
   return {
     low: total * 0.85,
     high: total * 1.15,
-    base, extra, usageObj, optionsTotal, rush, proj, total,
+    base, extra, usageObj, positioningObj, optionsTotal, rush, proj, total,
   };
 }
 
@@ -962,6 +1073,12 @@ function buildRecapItems(r){
     { label: 'Prestation', value: serviceLabel },
     { label: 'Type de projet', value: r.proj.label },
   ];
+  if(r.positioningObj){
+    items.push({ label: 'Positionnement', value: r.positioningObj.label });
+  }
+  if(state.sector.trim()){
+    items.push({ label: "Secteur d'activité", value: state.sector.trim() });
+  }
   if(showDuration){
     items.push({ label: state.service === 'edit_only' ? 'Volume de rushs' : 'Durée', value: durationLabel });
   }
@@ -984,9 +1101,9 @@ function buildWaMessage(r){
 Voici les infos de mon projet ${isVideo ? 'vidéo' : 'photo'} :
 ${lines}
 
-Estimation obtenue sur le configurateur : ${fmt(r.low)} € – ${fmt(r.high)} €
+Merci de me recontacter avec un devis.
 
-Merci de me recontacter pour affiner le devis.`
+[Repère interne, non communiqué au client : ${fmt(r.low)} € – ${fmt(r.high)} €]`
   );
 }
 
@@ -994,22 +1111,14 @@ function renderFinal(){
   const r = computePrice();
   const waMessage = buildWaMessage(r);
   const recapItems = buildRecapItems(r);
-  const isVideo = state.mode === 'video';
-  const editOnly = state.service === 'edit_only';
-  const shootOnly = state.service === 'shoot_only';
-  const baseLabel = isVideo
-    ? (editOnly ? 'Base montage (volume de rushs)' : shootOnly ? 'Base tournage seul' : 'Base tournage')
-    : (editOnly ? 'Base retouche' : shootOnly ? 'Base séance seule' : 'Base séance');
-  const extraLabel = isVideo ? 'Livrables additionnels' : 'Photos retouchées';
-  const showExtraRow = !shootOnly;
 
   const recapHtml = recapItems.map(i => `<div class="d-row"><span>${i.label}</span><span>${i.value}</span></div>`).join('');
 
   stage.innerHTML = `
     <div class="final-hero">
-      <div class="final-label">Ton estimation</div>
-      <div class="final-price">${fmt(r.low)} – ${fmt(r.high)} €</div>
-      <div class="final-sub">fourchette indicative avant échange détaillé</div>
+      <div class="final-label">C'est prêt</div>
+      <div class="final-confirm">🎬 J'ai toutes les infos pour te préparer un devis sur-mesure.</div>
+      <div class="final-sub">Envoie-moi ta demande, je reviens vers toi avec un chiffre précis.</div>
     </div>
 
     <div class="recap-box">
@@ -1018,27 +1127,16 @@ function renderFinal(){
     </div>
 
     <div class="evan-note">
-      🎬 On se lance ? Je réponds personnellement à chaque message sous 24h pour affiner ce devis à ton projet exact. Plus tôt tu me contactes, plus vite on peut caler ta date.
-      <div class="evan-signature">— Evan</div>
+      🎬 On se lance ? Je réponds personnellement à chaque message sous 24h pour préparer ce devis à ton projet exact. Plus tôt tu me contactes, plus vite on peut caler ta date.
+      <div class="evan-signature">Evan</div>
     </div>
 
     <a class="btn-primary" id="waBtn" href="https://wa.me/33781325185?text=${waMessage}" target="_blank" rel="noopener">💬 Contacter Evan sur WhatsApp</a>
     <div class="final-note">📱 Réponse sous 24h en général · TVA non applicable, art. 293 B du CGI</div>
-    <div class="detail-toggle" id="detailToggle">Voir le détail du calcul</div>
-    <div class="detail-box" id="detailBox" style="display:none">
-      <div class="d-row"><span>${baseLabel}</span><span>${fmt(r.base)} €</span></div>
-      ${showExtraRow ? `<div class="d-row"><span>${extraLabel}</span><span>${fmt(r.extra)} €</span></div>` : ''}
-      <div class="d-row"><span>Coefficient usage</span><span>x${r.usageObj.mult.toFixed(2)}</span></div>
-      <div class="d-row"><span>Options</span><span>${r.optionsTotal > 0 ? fmt(r.optionsTotal) + ' €' : '—'}${r.rush ? ' + urgence' : ''}</span></div>
-    </div>
     <a class="portfolio-link-final" href="https://instagram.com/evanvisions" target="_blank" rel="noopener">Voir le portfolio →</a>
     <div class="restart-link" id="restartLink">Recommencer une estimation</div>
   `;
 
-  document.getElementById('detailToggle').addEventListener('click', () => {
-    const box = document.getElementById('detailBox');
-    box.style.display = box.style.display === 'none' ? 'block' : 'none';
-  });
   document.getElementById('restartLink').addEventListener('click', () => {
     state = freshState();
     historyStack = [];
