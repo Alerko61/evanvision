@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Outil interne · Estimation rapide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@700&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root{
+  --bg: #0A0A0B;
+  --surface: #151517;
+  --surface-2: #1D1D20;
+  --line: #2C2C30;
+  --text: #F5F4F0;
+  --muted: #8E8E93;
+  --accent: #D1A85E;
+  --accent-text: #14120C;
+  --success: #D1A85E;
+  --radius: 999px;
+  --radius-card: 20px;
+}
+
+*{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body{
+  margin:0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+.app{
+  max-width: 460px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 18px 20px 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Desktop adaptation : l'outil devient une carte centrée plutôt qu'une page mobile étirée ---- */
+@media (min-width: 640px){
+  body{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .app{
+    max-width: 480px;
+    width: 100%;
+    min-height: auto;
+    margin: 40px auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    padding: 32px 36px 36px;
+    box-shadow: 0 40px 100px -30px rgba(0,0,0,0.7);
+  }
+}
+
+/* ---- Top chrome ---- */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 18px;
+  min-height: 32px;
+}
+.back-btn{
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 18px;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.brand-mini{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  margin-left:auto;
+  text-decoration: none;
+  cursor: pointer;
+}
+.brand-badge{
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.brand-wordmark{
+  font-family:'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+.progress{
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.progress-fill{
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+/* ---- Stage ---- */
+.stage{
+  flex: 1;
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn{
+  from{ opacity: 0; transform: translateY(6px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
+.question{
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.28;
+  margin: 4px 0 6px;
+}
+.question::before{
+  content: '✦ ';
+  color: var(--accent);
+}
+.question-sub{
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 0 0 20px;
+}
+
+/* ---- Choice cards ---- */
+.group-label{
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  font-weight: 700;
+  margin: 20px 0 8px;
+}
+.group-label:first-of-type{ margin-top: 4px; }
+
+.choice-card{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-card);
+  margin-bottom: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.choice-card:active{ background: var(--surface-2); }
+.choice-card.selected{
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+.choice-card .check{
+  margin-left: auto;
+  opacity: 0;
+  color: var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.choice-card.selected .check{ opacity: 1; }
+.opt-price-tag{
+  margin-left: auto;
+  font-family:'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  flex-shrink: 0;
+  padding-left: 8px;
+}
+.choice-card.selected .opt-price-tag{ color: var(--success); }
+
+/* ---- Mode picker ---- */
+.mode-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 8px;
+}
+.mode-card{
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 28px 12px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+}
+.mode-card:active{ background: var(--surface-2); }
+.mode-card .emoji{
+  font-size: 34px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* ---- Segmented toggle ---- */
+.segmented{
+  display:flex;
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 28px;
+}
+.segmented button{
+  flex:1;
+  padding: 11px;
+  min-height: 42px;
+  border:none;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 13px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family:'Inter', sans-serif;
+}
+.segmented button.active{
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ---- Stepper ---- */
+.stepper{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 26px;
+  margin: 26px 0 4px;
+}
+.stepper-btn{
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  color: var(--text);
+  font-size: 26px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 400;
+  line-height: 1;
+}
+.stepper-btn:active{ background: var(--accent); border-color: var(--accent); color:#fff; }
+.stepper-value{
+  font-family:'Space Mono', monospace;
+  font-size: 38px;
+  font-weight: 700;
+  min-width: 90px;
+  text-align: center;
+  color: var(--text);
+}
+.stepper-unit{
+  text-align:center;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 6px 0 24px;
+}
+.text-input{
+  width: 100%;
+  padding: 15px 16px;
+  min-height: 52px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-card);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+.text-input::placeholder{ color: var(--muted); }
+.text-input:focus{
+  outline: none;
+  border-color: var(--accent);
+}
+.duration-convert{
+  text-align:center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--success);
+  margin: -14px 0 20px;
+}
+
+/* ---- Buttons ---- */
+.btn-primary{
+  display:block;
+  width: 100%;
+  padding: 16px;
+  min-height: 52px;
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: var(--radius);
+  font-family:'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  text-align:center;
+  text-decoration:none;
+}
+.btn-primary:active{ background: #B8925A; }
+.btn-secondary{
+  display:block;
+  width: 100%;
+  padding: 14px;
+  min-height: 48px;
+  background: transparent;
+  color: var(--muted);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  font-family:'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  text-align:center;
+}
+
+/* ---- Final screen ---- */
+.final-hero{
+  text-align:center;
+  padding: 10px 0 4px;
+}
+.final-label{
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.final-price{
+  font-family:'Space Mono', monospace;
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--success);
+  line-height: 1.15;
+  word-break: break-word;
+}
+@media (min-width: 380px){
+  .final-price{ font-size: 44px; }
+}
+.final-confirm{
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.final-sub{
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.tjm-badge{
+  display: inline-block;
+  margin-top: 12px;
+  padding: 6px 14px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--success);
+}
+.tjm-badge.tjm-low{
+  color: #FF6B5E;
+  background: rgba(255,107,94,0.12);
+}
+.field{ margin-top: 20px; margin-bottom: 4px; }
+.field label{
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.note-textarea{
+  min-height: 80px;
+  resize: vertical;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.4;
+  padding-top: 13px;
+}
+.quick-toggle-grid{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.quick-chip{
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.quick-chip.selected{
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(209,168,94,0.12);
+}
+.quick-chip-price{
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  opacity: 0.8;
+}
+.final-note{
+  text-align:center;
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 12px;
+  line-height: 1.5;
+}
+.detail-toggle{
+  text-align:center;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: underline;
+  margin-top: 22px;
+  cursor: pointer;
+}
+.detail-box{
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border-radius: 12px;
+  font-size: 12.5px;
+}
+.d-row{
+  display:flex;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 6px 0;
+  color: var(--muted);
+  font-family:'Space Mono', monospace;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--line);
+}
+.d-row:last-child{ border-bottom: none; }
+.d-row span:first-child{ flex-shrink: 0; }
+.d-row span:last-child{ color: var(--text); text-align: right; }
+
+.recap-box{
+  margin-top: 22px;
+  padding: 16px;
+  background: var(--surface);
+  border-radius: var(--radius-card);
+}
+.recap-title{
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.evan-note{
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--surface-2);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.gate{
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+.gate-box{
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+}
+.gate-badge{
+  width: 48px;
+  height: 48px;
+  font-size: 16px;
+  margin: 0 auto 16px;
+}
+.gate-title{
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.gate-sub{
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+.gate-error{
+  margin-top: 12px;
+  font-size: 12.5px;
+  color: #FF6B5E;
+}
+
+.disclaimer-box{
+  margin-top: 24px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.paste-toggle{
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  padding: 10px;
+}
+.paste-box{
+  margin-top: 4px;
+}
+.paste-error{
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(255,107,94,0.1);
+  border-radius: 10px;
+  color: #FF6B5E;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+.evan-signature{
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.restart-link{
+  text-align:center;
+  margin-top: 22px;
+  font-size: 12.5px;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.portfolio-link-final{
+  display:block;
+  text-align:center;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.portfolio-link-final:hover{ text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <div class="gate-box">
+    <div class="brand-badge gate-badge">EV</div>
+    <div class="gate-title">Accès restreint</div>
+    <div class="gate-sub">Outil interne — mot de passe requis.</div>
+    <input type="password" class="text-input" id="gatePassword" placeholder="Mot de passe" autocomplete="off">
+    <button type="button" class="btn-primary" id="gateSubmit">Déverrouiller</button>
+    <div class="gate-error" id="gateError" style="display:none;">Mot de passe incorrect.</div>
+  </div>
+</div>
+
+<div class="app" id="appRoot" style="display:none;">
+  <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="topbar">
+    <button type="button" class="back-btn" id="backBtn">←</button>
+    <a href="https://evanvisions.com" target="_blank" rel="noopener" class="brand-mini">
+      <div class="brand-badge">EV</div>
+      <div class="brand-wordmark">Evan Visions</div>
+    </a>
+  </div>
+
+  <div class="stage" id="stage"></div>
+</div>
+
+<script>
+/* ============================================================
+   DONNÉES : tarifs calés sur des fourchettes marché françaises
+   ============================================================ */
+
+const VIDEO_TYPES = [
+  { value:'wedding',      label:'Mariage',                                 group:'Événements privés',      dayRate:1800, unitRate:250 },
+  { value:'baptism',      label:'Baptême / communion',                     group:'Événements privés',      dayRate:600,  unitRate:100 },
+  { value:'birthday',     label:'Anniversaire / fête privée',              group:'Événements privés',      dayRate:450,  unitRate:100 },
+  { value:'evjf',         label:'EVJF / EVG',                              group:'Événements privés',      dayRate:500,  unitRate:100 },
+  { value:'brand',        label:'Film de marque',                          group:'Marques & entreprises',  dayRate:650,  unitRate:120 },
+  { value:'ad',           label:'Spot publicitaire',                       group:'Marques & entreprises',  dayRate:850,  unitRate:150 },
+  { value:'corporate',    label:'Vidéo institutionnelle / entreprise',     group:'Marques & entreprises',  dayRate:600,  unitRate:120 },
+  { value:'event_corp',   label:'Captation événementielle',                group:'Marques & entreprises',  dayRate:700,  unitRate:120 },
+  { value:'training',     label:'Vidéo de formation / e-learning',         group:'Marques & entreprises',  dayRate:500,  unitRate:100 },
+  { value:'product',      label:'Vidéo produit / e-commerce',              group:'Marques & entreprises',  dayRate:450,  unitRate:100 },
+  { value:'real_estate',  label:'Vidéo immobilière',                       group:'Marques & entreprises',  dayRate:500,  unitRate:80  },
+  { value:'portrait',     label:'Portrait / interview professionnel',      group:'Marques & entreprises',  dayRate:500,  unitRate:100 },
+  { value:'social',       label:'Contenu réseaux sociaux',                 group:'Créatif & réseaux',      dayRate:400,  unitRate:100 },
+  { value:'music_clip',   label:'Clip musique',                            group:'Créatif & réseaux',      dayRate:750,  unitRate:150 },
+  { value:'sports_event', label:'Vidéo sportive / compétition',            group:'Créatif & réseaux',      dayRate:600,  unitRate:120 },
+  { value:'show',         label:'Captation spectacle / concert',           group:'Créatif & réseaux',      dayRate:650,  unitRate:120 },
+  { value:'drone_only',   label:'Vidéo drone seule',                       group:'Créatif & réseaux',      dayRate:350,  unitRate:80  },
+  { value:'other',        label:'Autre projet / sur-mesure',               group:'Autre',                  dayRate:550,  unitRate:120 },
+];
+
+const PHOTO_TYPES = [
+  { value:'wedding',      label:'Mariage',                                 group:'Événements privés',      dayRate:2000, unitRate:12 },
+  { value:'baptism',      label:'Baptême / communion',                     group:'Événements privés',      dayRate:500,  unitRate:8  },
+  { value:'birthday',     label:'Anniversaire / fête privée',              group:'Événements privés',      dayRate:350,  unitRate:6  },
+  { value:'evjf',         label:'EVJF / EVG',                              group:'Événements privés',      dayRate:400,  unitRate:6  },
+  { value:'family',       label:'Séance famille / nouveau-né',             group:'Événements privés',      dayRate:450,  unitRate:10 },
+  { value:'corporate',    label:'Portrait corporate / trombinoscope',      group:'Marques & entreprises',  dayRate:650,  unitRate:15 },
+  { value:'event_corp',   label:'Événementiel entreprise',                 group:'Marques & entreprises',  dayRate:600,  unitRate:8  },
+  { value:'product',      label:'Produit / e-commerce',                    group:'Marques & entreprises',  dayRate:500,  unitRate:10 },
+  { value:'real_estate',  label:'Immobilier',                              group:'Marques & entreprises',  dayRate:400,  unitRate:8  },
+  { value:'portrait',     label:'Portrait individuel / personal branding', group:'Créatif & personnel',    dayRate:700,  unitRate:15 },
+  { value:'book',         label:'Book photo / mode',                       group:'Créatif & personnel',    dayRate:900,  unitRate:18 },
+  { value:'sports_event', label:'Sportif / compétition',                   group:'Créatif & personnel',    dayRate:500,  unitRate:8  },
+  { value:'other',        label:'Autre projet / sur-mesure',               group:'Autre',                  dayRate:500,  unitRate:10 },
+];
+
+const VIDEO_OPTIONS = [
+  { key:'drone',            label:'Drone (vues aériennes)',                price:150, requiresShoot:true },
+  { key:'cam360',           label:'Caméra 360° immersive',                 price:120, requiresShoot:true },
+  { key:'sound',            label:'Sound design sur-mesure',               price:100, requiresPost:true },
+  { key:'travel',           label:'Déplacement +100 km',                   price:150, requiresShoot:true },
+  { key:'live_stream',      label:'Diffusion en direct pour les absents',  price:250, requiresShoot:true,
+    types:['wedding','baptism','birthday','evjf','event_corp','show','sports_event'] },
+  { key:'guest_interviews', label:'Messages vidéo des invités',            price:150, requiresShoot:true,
+    types:['wedding','baptism','birthday','evjf','event_corp'] },
+  { key:'usb_box',          label:'Coffret souvenir (clé USB gravée)',     price:60,
+    types:['wedding','baptism','birthday','evjf'] },
+  { key:'vertical_bonus',   label:'Version verticale bonus (Stories)',     price:80,  requiresPost:true,
+    types:['wedding','baptism','birthday','evjf','social','music_clip','sports_event','show','brand','ad','event_corp','product'] },
+  { key:'time_capsule',     label:'Capsule temporelle (envoi différé)',    price:40,
+    types:['wedding','baptism','birthday','evjf'] },
+  { key:'express',          label:'Livraison express (48h)',               price:80  },
+  { key:'rush',             label:'Tournage urgent (< 1 sem.)',            price:0, percent:20 },
+];
+
+const PHOTO_OPTIONS = [
+  { key:'drone',          label:'Drone (vues aériennes)',            price:150, requiresShoot:true },
+  { key:'studio',         label:'Location studio professionnel',     price:100, requiresShoot:true,
+    types:['portrait','book','corporate','product','family'] },
+  { key:'prints',         label:'Tirages papier + album photo',      price:150, requiresPost:true,
+    types:['wedding','baptism','birthday','evjf','family','portrait','book'] },
+  { key:'mua',            label:'Maquillage & coiffure (MUA)',       price:120, requiresShoot:true,
+    types:['wedding','baptism','birthday','evjf','portrait','book','family'] },
+  { key:'express',        label:'Livraison express (48h)',           price:80  },
+  { key:'travel',         label:'Déplacement +100 km',               price:150, requiresShoot:true },
+  { key:'rush',           label:'Séance urgente (< 1 sem.)',         price:0, percent:20 },
+];
+
+const USAGE_OPTIONS = [
+  { value:'private',       label:'Usage personnel / privé',              mult:0.9  },
+  { value:'organic',       label:'Réseaux sociaux (organique)',          mult:1.0  },
+  { value:'website',       label:"Site web / vitrine d'entreprise",      mult:1.15 },
+  { value:'internal',      label:'Interne entreprise / formation',       mult:1.0  },
+  { value:'paid',          label:'Publicité payante (ads en ligne)',     mult:1.4  },
+  { value:'broadcast',     label:'National / TV / affichage',            mult:1.9  },
+  { value:'international', label:'International / broadcast multi-pays',mult:2.3  },
+];
+
+// Palier de positionnement, demandé uniquement pour les projets "Marques & entreprises" :
+// un bijoutier/horloger haut de gamme et un petit artisan ébéniste n'ont ni le même budget,
+// ni la même valeur perçue à défendre, même pour un projet du même type.
+const POSITIONING_OPTIONS = [
+  { value:'artisan', label:'Artisan / petite structure indépendante', mult:0.85 },
+  { value:'pme',     label:'PME / entreprise déjà établie',           mult:1.0  },
+  { value:'premium', label:'Marque premium / haut de gamme',          mult:1.35 },
+];
+
+function typeNeedsPositioning(mode, typeValue){
+  const types = mode === 'video' ? VIDEO_TYPES : PHOTO_TYPES;
+  const t = types.find(x => x.value === typeValue);
+  return t && t.group === 'Marques & entreprises';
+}
+
+const MODE_CONFIG = {
+  video: {
+    includedCount: 1,
+    noPostFactor: 0.45,
+    editOnlyFactor: 0.55,
+    countQuestion: 'Combien de vidéos finales ?',
+    countSub: 'Ex : 1 film long + 2 formats courts réseaux sociaux = 3.',
+    countLabel: 'vidéo(s) finale(s)',
+    countMin: 1, countMax: 8, countStep: 1,
+    serviceQuestion: 'Quelle prestation ?',
+    serviceFull: 'Tournage + montage',
+    serviceFullSub: "Je n'ai pas encore d'images, il me faut le tournage ET le montage.",
+    serviceShootOnly: 'Tournage seul',
+    serviceShootOnlySub: "Je n'ai pas encore d'images, il me faut juste le tournage (rushes bruts, sans montage).",
+    serviceEditOnly: 'Montage seul',
+    serviceEditOnlySub: "J'ai déjà mes rushs, je veux juste le montage.",
+    durationFullLabel: 'de tournage',
+    durationEditLabel: 'de rushs par vidéo',
+    durationFullDesc: "C'est le nombre d'heures pendant lesquelles je suis présent sur place pour filmer (installation et temps de battement compris).",
+    durationEditDesc: "C'est le volume de rushs que j'ai à trier et monter pour chaque vidéo, exprimé en heures.",
+  },
+  photo: {
+    includedCount: 15,
+    noPostFactor: 0.55,
+    editOnlyFactor: 1, // sans objet : le tarif "retouche seule" est calculé au photo, pas au temps
+    countQuestion: 'Combien de photos retouchées ?',
+    countSub: 'Les 15 premières photos sont incluses dans le tarif de base.',
+    countLabel: 'photo(s) retouchée(s)',
+    countMin: 5, countMax: 100, countStep: 5,
+    serviceQuestion: 'Quelle prestation ?',
+    serviceFull: 'Prise de vue + retouche',
+    serviceFullSub: "Je n'ai pas encore de photos, il me faut la séance ET la retouche.",
+    serviceShootOnly: 'Prise de vue seule',
+    serviceShootOnlySub: "Je n'ai pas encore de photos, il me faut juste la séance (fichiers RAW, sans retouche).",
+    serviceEditOnly: 'Retouche seule',
+    serviceEditOnlySub: "J'ai déjà mes photos, je veux juste la retouche.",
+    durationFullLabel: 'de séance',
+    durationEditLabel: '',
+    durationFullDesc: "C'est le nombre d'heures pendant lesquelles je suis présent sur place pour la séance photo.",
+    durationEditDesc: '',
+  },
+};
+
+const MIN_RETOUCH_FORFAIT = 40; // plancher pour une retouche photo seule, même sur un petit lot
+
+// Coefficient régional appliqué à tous les tarifs de base (dayRate/unitRate).
+// Evan exerce en Auvergne-Rhône-Alpes : les tarifs moyens en France sont ~15-25% en dessous
+// de ceux pratiqués à Paris. -10% est un ajustement médian, à affiner si besoin
+// (ex: 1 = tarifs Paris, 0.85-0.9 = grandes villes de région, 0.75-0.8 = zones rurales).
+const REGIONAL_FACTOR = 0.90;
+
+// Plancher horaire réel d'Evan, pour comparaison rapide avec le TJM effectif calculé sur chaque projet.
+const MIN_HOURLY_FLOOR = 40;
+
+// Taux de charges URSSAF pour un auto-entrepreneur en prestations de services (BIC), 2026.
+// Sert uniquement à donner un ordre de grandeur du net, pas une valeur comptable exacte.
+const URSSAF_RATE = 0.212;
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+function freshState(){
+  return {
+    mode: null,
+    service: 'full', // 'full' | 'shoot_only' | 'edit_only'
+    type: null,
+    positioning: 'pme',
+    sector: '',
+    otherDetails: '',
+    note: '',
+    hours: 8, // 8h = 1 jour de tournage/séance par défaut
+    count: 1,
+    usage: null,
+    options: new Set(),
+  };
+}
+let state = freshState();
+let currentStep = 'mode';
+let historyStack = [];
+
+const STEP_ORDER = ['mode','service','type','positioning','duration','count','usage','options','final'];
+
+function formatDuration(hours){
+  const days = Math.floor(hours / 8);
+  const rem = hours % 8;
+  if(days === 0) return hours + ' heure' + (hours > 1 ? 's' : '');
+  if(rem === 0) return days + ' jour' + (days > 1 ? 's' : '');
+  return days + ' jour' + (days > 1 ? 's' : '') + ' + ' + rem + ' heure' + (rem > 1 ? 's' : '');
+}
+
+function fmt(n){ return Math.round(n).toLocaleString('fr-FR'); }
+
+// Arrondi "à la louche" pour la fourchette affichée en gros : volontairement peu précis pour
+// que le prospect le lise comme une idée générale et non un montant figé auquel s'accrocher.
+function roundRough(n){
+  if(n < 150) return Math.round(n / 5) * 5;
+  if(n < 500) return Math.round(n / 10) * 10;
+  if(n < 2000) return Math.round(n / 25) * 25;
+  return Math.round(n / 50) * 50;
+}
+function fmtRough(n){ return roundRough(n).toLocaleString('fr-FR'); }
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+const stage = document.getElementById('stage');
+const backBtn = document.getElementById('backBtn');
+const progressFill = document.getElementById('progressFill');
+
+function goTo(step){
+  historyStack.push(currentStep);
+  currentStep = step;
+  render();
+}
+function goBack(){
+  if(historyStack.length === 0) return;
+  currentStep = historyStack.pop();
+  render();
+}
+backBtn.addEventListener('click', goBack);
+
+function updateChrome(){
+  const idx = STEP_ORDER.indexOf(currentStep);
+  const pct = (idx / (STEP_ORDER.length - 1)) * 100;
+  progressFill.style.width = pct + '%';
+  backBtn.style.display = historyStack.length > 0 ? 'flex' : 'none';
+}
+
+function render(){
+  updateChrome();
+  switch(currentStep){
+    case 'mode': renderMode(); break;
+    case 'service': renderService(); break;
+    case 'type': renderType(); break;
+    case 'positioning': renderPositioning(); break;
+    case 'duration': renderDuration(); break;
+    case 'count': renderCount(); break;
+    case 'usage': renderUsage(); break;
+    case 'options': renderOptions(); break;
+    case 'final': renderFinal(); break;
+  }
+}
+
+/* ============================================================
+   STEP: MODE
+   ============================================================ */
+
+function renderMode(){
+  stage.innerHTML = `
+    <h2 class="question">Vidéo ou photo ?</h2>
+    <p class="question-sub">Outil interne — remplis en 30 secondes pour te caler avant de répondre à un prospect.</p>
+    <div class="mode-grid">
+      <div class="mode-card ${state.mode==='video'?'selected':''}" data-mode="video"><span class="emoji">🎥</span>Vidéo</div>
+      <div class="mode-card ${state.mode==='photo'?'selected':''}" data-mode="photo"><span class="emoji">📷</span>Photo</div>
+    </div>
+
+    <div class="paste-toggle" id="pasteToggle">📋 Coller un récap reçu par WhatsApp →</div>
+    <div class="paste-box" id="pasteBox" style="display:none;">
+      <textarea class="text-input note-textarea" id="pasteInput" placeholder="Colle ici le message reçu du prospect..."></textarea>
+      <button type="button" class="btn-primary" id="importBtn">Importer et calculer</button>
+      <div class="paste-error" id="pasteError" style="display:none;"></div>
+    </div>
+
+    <div class="disclaimer-box">
+      🔒 Usage interne uniquement. Le prix ici est un ordre de grandeur calculé automatiquement — à toi d'ajuster selon le brief réel avant de répondre au client.
+    </div>
+  `;
+  stage.querySelectorAll('.mode-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const newMode = card.dataset.mode;
+      if(newMode !== state.mode){
+        state = freshState();
+        state.mode = newMode;
+        state.count = MODE_CONFIG[newMode].includedCount === 1 ? 1 : 20;
+      }
+      goTo('service');
+    });
+  });
+
+  document.getElementById('pasteToggle').addEventListener('click', () => {
+    const box = document.getElementById('pasteBox');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  });
+
+  document.getElementById('importBtn').addEventListener('click', () => {
+    const text = document.getElementById('pasteInput').value;
+    const errorBox = document.getElementById('pasteError');
+    const result = parseRecapText(text);
+    if(!result.success){
+      errorBox.textContent = '⚠️ ' + result.errors.join(' ') + ' Vérifie que le texte collé est bien complet, ou remplis à la main.';
+      errorBox.style.display = 'block';
+      return;
+    }
+    state = result.state;
+    historyStack = [];
+    currentStep = 'final';
+    render();
+  });
+}
+
+/* ============================================================
+   IMPORT : parse un récap collé (format généré par l'outil public)
+   ============================================================ */
+
+function parseDurationString(str){
+  let hours = 0;
+  const dayMatch = str.match(/(\d+)\s*jour/i);
+  const hourAfterDay = str.match(/\+\s*(\d+)\s*heure/i);
+  const hourOnly = !dayMatch ? str.match(/(\d+)\s*heure/i) : null;
+  if(dayMatch) hours += parseInt(dayMatch[1], 10) * 8;
+  if(hourAfterDay) hours += parseInt(hourAfterDay[1], 10);
+  else if(hourOnly) hours += parseInt(hourOnly[1], 10);
+  return hours || 8;
+}
+
+function parseRecapText(text){
+  const errors = [];
+  let mode = null;
+  if(/projet vidéo/i.test(text)) mode = 'video';
+  else if(/projet photo/i.test(text)) mode = 'photo';
+  if(!mode){ return { success:false, errors:["Impossible de détecter si c'est un projet vidéo ou photo."] }; }
+
+  const types = mode === 'video' ? VIDEO_TYPES : PHOTO_TYPES;
+  const cfg = MODE_CONFIG[mode];
+  const opts = mode === 'video' ? VIDEO_OPTIONS : PHOTO_OPTIONS;
+
+  function getLine(label){
+    const re = new RegExp('-\\s*' + label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*:\\s*(.+)', 'i');
+    const m = text.match(re);
+    return m ? m[1].trim() : null;
+  }
+
+  const newState = freshState();
+  newState.mode = mode;
+
+  const prestationRaw = getLine('Prestation');
+  if(prestationRaw === cfg.serviceFull) newState.service = 'full';
+  else if(prestationRaw === cfg.serviceShootOnly) newState.service = 'shoot_only';
+  else if(prestationRaw === cfg.serviceEditOnly) newState.service = 'edit_only';
+  else errors.push("Prestation non reconnue.");
+
+  const typeRaw = getLine('Type de projet');
+  const t = typeRaw ? types.find(x => x.label === typeRaw) : null;
+  if(t){ newState.type = t.value; } else { errors.push("Type de projet introuvable."); }
+
+  const positioningRaw = getLine('Positionnement');
+  if(positioningRaw){
+    const p = POSITIONING_OPTIONS.find(x => x.label === positioningRaw);
+    if(p) newState.positioning = p.value;
+  }
+
+  const sectorRaw = getLine("Secteur d'activité");
+  if(sectorRaw) newState.sector = sectorRaw;
+
+  const otherRaw = getLine('Description du projet');
+  if(otherRaw) newState.otherDetails = otherRaw;
+
+  const durationRaw = getLine('Durée') || getLine('Volume de rushs');
+  if(durationRaw) newState.hours = parseDurationString(durationRaw);
+
+  const countRaw = getLine('Livrables souhaités') || getLine('Photos retouchées');
+  if(countRaw){
+    const n = parseInt(countRaw, 10);
+    if(!isNaN(n)) newState.count = n;
+  }
+
+  const usageRaw = getLine('Usage prévu');
+  const u = usageRaw ? USAGE_OPTIONS.find(x => x.label === usageRaw) : null;
+  if(u){ newState.usage = u.value; } else { errors.push("Usage prévu introuvable."); }
+
+  const optionsRaw = getLine('Options');
+  if(optionsRaw && optionsRaw !== 'Aucune'){
+    optionsRaw.split(',').map(s => s.trim()).forEach(label => {
+      const o = opts.find(x => x.label === label);
+      if(o) newState.options.add(o.key);
+    });
+  }
+
+  if(errors.length > 0){ return { success:false, errors }; }
+  return { success:true, state:newState };
+}
+
+/* ============================================================
+   STEP: SERVICE (prestation complète ou montage/retouche seul)
+   ============================================================ */
+
+function renderService(){
+  const cfg = MODE_CONFIG[state.mode];
+  stage.innerHTML = `
+    <h2 class="question">${cfg.serviceQuestion}</h2>
+    <div class="choice-card ${state.service==='full'?'selected':''}" data-val="full">
+      <span>${cfg.serviceFull}<br><span style="font-weight:400;font-size:12.5px;color:var(--muted);">${cfg.serviceFullSub}</span></span>
+      <span class="check">✓</span>
+    </div>
+    <div class="choice-card ${state.service==='shoot_only'?'selected':''}" data-val="shoot_only">
+      <span>${cfg.serviceShootOnly}<br><span style="font-weight:400;font-size:12.5px;color:var(--muted);">${cfg.serviceShootOnlySub}</span></span>
+      <span class="check">✓</span>
+    </div>
+    <div class="choice-card ${state.service==='edit_only'?'selected':''}" data-val="edit_only">
+      <span>${cfg.serviceEditOnly}<br><span style="font-weight:400;font-size:12.5px;color:var(--muted);">${cfg.serviceEditOnlySub}</span></span>
+      <span class="check">✓</span>
+    </div>
+  `;
+  stage.querySelectorAll('.choice-card').forEach(card => {
+    card.addEventListener('click', () => {
+      state.service = card.dataset.val;
+      goTo('type');
+    });
+  });
+}
+
+/* ============================================================
+   STEP: TYPE
+   ============================================================ */
+
+function goToAfterPositioning(){
+  if(state.mode === 'photo' && state.service === 'edit_only'){
+    goTo('count'); // retouche seule photo : pas de séance à chiffrer, on charge au nombre de photos
+  } else {
+    goTo('duration');
+  }
+}
+
+function renderType(){
+  const types = state.mode === 'video' ? VIDEO_TYPES : PHOTO_TYPES;
+  const groups = [...new Set(types.map(t => t.group))];
+  let html = `<h2 class="question">Quel est ton projet ?</h2>`;
+  groups.forEach(g => {
+    html += `<div class="group-label">${g}</div>`;
+    types.filter(t => t.group === g).forEach(t => {
+      html += `<div class="choice-card ${state.type===t.value?'selected':''}" data-value="${t.value}">${t.label}<span class="check">✓</span></div>`;
+    });
+  });
+  stage.innerHTML = html;
+  stage.querySelectorAll('.choice-card').forEach(card => {
+    card.addEventListener('click', () => {
+      state.type = card.dataset.value;
+      if(typeNeedsPositioning(state.mode, state.type)){
+        goTo('positioning');
+      } else {
+        goToAfterPositioning();
+      }
+    });
+  });
+}
+
+/* ============================================================
+   STEP: POSITIONING (uniquement pour les projets marques & entreprises)
+   ============================================================ */
+
+function renderPositioning(){
+  let html = `<h2 class="question">Comment situerais-tu la marque ?</h2><p class="question-sub">Un bijoutier haut de gamme et un artisan indépendant n'ont pas le même budget ni la même valeur à défendre, même pour un projet similaire.</p>`;
+  POSITIONING_OPTIONS.forEach(p => {
+    html += `<div class="choice-card ${state.positioning===p.value?'selected':''}" data-val="${p.value}">${p.label}<span class="check">✓</span></div>`;
+  });
+  stage.innerHTML = html;
+  stage.querySelectorAll('.choice-card').forEach(card => {
+    card.addEventListener('click', () => {
+      state.positioning = card.dataset.val;
+      goToAfterPositioning();
+    });
+  });
+}
+
+/* ============================================================
+   STEP: DURATION
+   ============================================================ */
+
+function renderDuration(){
+  const cfg = MODE_CONFIG[state.mode];
+  const label = state.service === 'edit_only' ? cfg.durationEditLabel : cfg.durationFullLabel;
+  const desc = state.service === 'edit_only' ? cfg.durationEditDesc : cfg.durationFullDesc;
+  stage.innerHTML = `
+    <h2 class="question">Combien d'heures ${label} ?</h2>
+    <p class="question-sub">💡 ${desc}</p>
+    <div class="stepper">
+      <button type="button" class="stepper-btn" id="stepMinus">–</button>
+      <div class="stepper-value" id="stepValue">${state.hours}</div>
+      <button type="button" class="stepper-btn" id="stepPlus">+</button>
+    </div>
+    <div class="stepper-unit">heure(s)</div>
+    <p class="duration-convert" id="durationConvert">≈ ${formatDuration(state.hours)}</p>
+    <button type="button" class="btn-primary" id="nextBtn">Suivant</button>
+  `;
+
+  function updateDisplay(){
+    document.getElementById('stepValue').textContent = state.hours;
+    document.getElementById('durationConvert').textContent = '≈ ' + formatDuration(state.hours);
+  }
+
+  document.getElementById('stepPlus').addEventListener('click', () => {
+    state.hours = Math.min(40, state.hours + 1);
+    updateDisplay();
+  });
+  document.getElementById('stepMinus').addEventListener('click', () => {
+    state.hours = Math.max(1, state.hours - 1);
+    updateDisplay();
+  });
+
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    goTo(state.service === 'shoot_only' ? 'usage' : 'count');
+  });
+}
+
+/* ============================================================
+   STEP: COUNT (livrables / photos)
+   ============================================================ */
+
+function renderCount(){
+  const cfg = MODE_CONFIG[state.mode];
+  stage.innerHTML = `
+    <h2 class="question">${cfg.countQuestion}</h2>
+    <p class="question-sub">${cfg.countSub}</p>
+    <div class="stepper">
+      <button type="button" class="stepper-btn" id="cMinus">–</button>
+      <div class="stepper-value" id="cValue">${state.count}</div>
+      <button type="button" class="stepper-btn" id="cPlus">+</button>
+    </div>
+    <div class="stepper-unit">${cfg.countLabel}</div>
+    <button type="button" class="btn-primary" id="nextBtn">Suivant</button>
+  `;
+  document.getElementById('cPlus').addEventListener('click', () => {
+    state.count = Math.min(cfg.countMax, state.count + cfg.countStep);
+    document.getElementById('cValue').textContent = state.count;
+  });
+  document.getElementById('cMinus').addEventListener('click', () => {
+    state.count = Math.max(cfg.countMin, state.count - cfg.countStep);
+    document.getElementById('cValue').textContent = state.count;
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => goTo('usage'));
+}
+
+/* ============================================================
+   STEP: USAGE
+   ============================================================ */
+
+function renderUsage(){
+  let html = `<h2 class="question">Usage prévu des images ?</h2>`;
+  USAGE_OPTIONS.forEach(u => {
+    html += `<div class="choice-card ${state.usage===u.value?'selected':''}" data-val="${u.value}">${u.label}<span class="check">✓</span></div>`;
+  });
+  stage.innerHTML = html;
+  stage.querySelectorAll('.choice-card').forEach(card => {
+    card.addEventListener('click', () => {
+      state.usage = card.dataset.val;
+      goTo('options');
+    });
+  });
+}
+
+/* ============================================================
+   STEP: OPTIONS
+   ============================================================ */
+
+function getApplicableOptions(){
+  const allOpts = state.mode === 'video' ? VIDEO_OPTIONS : PHOTO_OPTIONS;
+  let opts = allOpts;
+  if(state.service === 'edit_only') opts = opts.filter(o => !o.requiresShoot);
+  if(state.service === 'shoot_only') opts = opts.filter(o => !o.requiresPost);
+  // Ne garder que les options pertinentes pour le type de projet choisi (une option
+  // sans liste "types" est considérée universelle ; "other" voit tout, faute de mieux)
+  opts = opts.filter(o => !o.types || state.type === 'other' || o.types.includes(state.type));
+  return opts;
+}
+
+function renderOptions(){
+  const opts = getApplicableOptions();
+  let html = `<h2 class="question">Des options en plus ?</h2><p class="question-sub">Sélectionne tout ce qui t'intéresse, ou passe directement à l'estimation.</p>`;
+  opts.forEach(o => {
+    const priceLabel = o.percent ? `+${o.percent}%` : `+${o.price} €`;
+    html += `<div class="choice-card ${state.options.has(o.key)?'selected':''}" data-key="${o.key}">${o.label}<span class="opt-price-tag">${priceLabel}</span></div>`;
+  });
+  html += `<button type="button" class="btn-primary" id="nextBtn">Voir mon estimation</button>`;
+  stage.innerHTML = html;
+  stage.querySelectorAll('.choice-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const key = card.dataset.key;
+      if(state.options.has(key)){ state.options.delete(key); card.classList.remove('selected'); }
+      else { state.options.add(key); card.classList.add('selected'); }
+    });
+  });
+  document.getElementById('nextBtn').addEventListener('click', () => goTo('final'));
+}
+
+/* ============================================================
+   PRICE COMPUTATION
+   ============================================================ */
+
+function computePrice(){
+  const isVideo = state.mode === 'video';
+  const types = isVideo ? VIDEO_TYPES : PHOTO_TYPES;
+  const proj = types.find(t => t.value === state.type);
+  const cfg = MODE_CONFIG[state.mode];
+  // Coefficient régional : Evan exerce en Auvergne-Rhône-Alpes, pas à Paris.
+  // Les tarifs journaliers moyens en France sont ~15-25% plus bas qu'à Paris ;
+  // on applique -10% aux tarifs de base pour rester cohérent avec le marché régional.
+  const dayRate = proj.dayRate * REGIONAL_FACTOR;
+  const unitRate = proj.unitRate * REGIONAL_FACTOR;
+  const hourlyRate = dayRate / 8;
+  const timeCost = state.hours * hourlyRate;
+
+  let base = 0;
+  let extra = 0;
+
+  if(state.service === 'edit_only'){
+    if(isVideo){
+      // Montage seul : le temps saisi représente le volume de rushs à monter, pas un tournage
+      base = timeCost * cfg.editOnlyFactor;
+      extra = Math.max(0, state.count - cfg.includedCount) * unitRate;
+    } else {
+      // Retouche seule : pas de séance à chiffrer, tarif au nombre de photos avec un plancher
+      base = 0;
+      extra = Math.max(state.count * unitRate, MIN_RETOUCH_FORFAIT * REGIONAL_FACTOR);
+    }
+  } else if(state.service === 'shoot_only'){
+    // Tournage/prise de vue seul(e), pas de montage : aucun coût de livrable additionnel
+    base = timeCost * cfg.noPostFactor;
+    extra = 0;
+  } else {
+    // Prestation complète : tournage/séance + montage/retouche inclus.
+    // Le montage/la retouche est facturé pour chaque livrable dès le premier
+    // (avant, le premier livrable était "inclus gratuitement" dans le tarif jour,
+    // ce qui sous-évaluait largement le temps de post-production réel).
+    base = timeCost;
+    extra = state.count * unitRate;
+  }
+
+  const usageObj = USAGE_OPTIONS.find(u => u.value === state.usage);
+  const needsPositioning = typeNeedsPositioning(state.mode, state.type);
+  const positioningObj = needsPositioning ? POSITIONING_OPTIONS.find(p => p.value === state.positioning) : null;
+  const positioningMult = positioningObj ? positioningObj.mult : 1;
+  const subtotal = (base + extra) * usageObj.mult * positioningMult;
+
+  const opts = isVideo ? VIDEO_OPTIONS : PHOTO_OPTIONS;
+  let optionsTotal = 0;
+  let rush = false;
+  state.options.forEach(key => {
+    const opt = opts.find(o => o.key === key);
+    if(opt.percent){ rush = true; }
+    else { optionsTotal += opt.price; }
+  });
+
+  let total = subtotal + optionsTotal;
+  if(rush){ total *= 1.2; }
+
+  return {
+    low: total * 0.85,
+    high: total * 1.15,
+    base, extra, usageObj, positioningObj, optionsTotal, rush, proj, total,
+  };
+}
+
+/* ============================================================
+   STEP: FINAL
+   ============================================================ */
+
+function buildRecapItems(r){
+  const isVideo = state.mode === 'video';
+  const cfg = MODE_CONFIG[state.mode];
+  const opts = isVideo ? VIDEO_OPTIONS : PHOTO_OPTIONS;
+  const checkedOptions = Array.from(state.options).map(key => opts.find(o => o.key === key).label).join(', ') || 'Aucune';
+  const durationLabel = formatDuration(state.hours);
+  const serviceLabel = state.service === 'full' ? cfg.serviceFull
+    : state.service === 'shoot_only' ? cfg.serviceShootOnly
+    : cfg.serviceEditOnly;
+
+  const showDuration = state.service !== 'edit_only' || isVideo;
+  const showCount = state.service !== 'shoot_only';
+
+  const items = [
+    { label: 'Prestation', value: serviceLabel },
+    { label: 'Type de projet', value: r.proj.label },
+  ];
+  if(state.type === 'other' && state.otherDetails.trim()){
+    items.push({ label: 'Description du projet', value: state.otherDetails.trim() });
+  }
+  if(r.positioningObj){
+    items.push({ label: 'Positionnement', value: r.positioningObj.label });
+  }
+  if(state.sector.trim()){
+    items.push({ label: "Secteur d'activité", value: state.sector.trim() });
+  }
+  if(showDuration){
+    items.push({ label: state.service === 'edit_only' ? 'Volume de rushs' : 'Durée', value: durationLabel });
+  }
+  if(showCount){
+    items.push({ label: isVideo ? 'Livrables souhaités' : 'Photos retouchées', value: state.count });
+  }
+  items.push({ label: 'Usage prévu', value: r.usageObj.label });
+  items.push({ label: 'Options', value: checkedOptions });
+  return items;
+}
+
+function buildCopyText(r, recapItems){
+  const isVideo = state.mode === 'video';
+  const lines = recapItems.map(i => `- ${i.label} : ${i.value}`).join('\n');
+  const noteLine = state.note.trim() ? `\n\nNote : ${state.note.trim()}` : '';
+
+  return `Projet ${isVideo ? 'vidéo' : 'photo'} :
+${lines}
+
+Estimation : ${fmt(r.low)} € – ${fmt(r.high)} €${noteLine}`;
+}
+
+function renderFinal(){
+  const r = computePrice();
+  const recapItems = buildRecapItems(r);
+  const isVideo = state.mode === 'video';
+  const editOnly = state.service === 'edit_only';
+  const shootOnly = state.service === 'shoot_only';
+  const baseLabel = isVideo
+    ? (editOnly ? 'Base montage (volume de rushs)' : shootOnly ? 'Base tournage seul' : 'Base tournage')
+    : (editOnly ? 'Base retouche' : shootOnly ? 'Base séance seule' : 'Base séance');
+  const extraLabel = isVideo ? 'Livrables additionnels' : 'Photos retouchées';
+  const showExtraRow = !shootOnly;
+
+  // TJM effectif : pas pertinent pour la retouche photo seule, où "hours" n'a jamais été demandé
+  const hoursIsMeaningful = !(state.mode === 'photo' && state.service === 'edit_only');
+  const effectiveRate = hoursIsMeaningful ? Math.round(r.total / state.hours) : null;
+  const belowFloor = effectiveRate !== null && effectiveRate < MIN_HOURLY_FLOOR;
+
+  const netLow = r.low * (1 - URSSAF_RATE);
+  const netHigh = r.high * (1 - URSSAF_RATE);
+
+  const recapHtml = recapItems.map(i => `<div class="d-row"><span>${i.label}</span><span>${i.value}</span></div>`).join('');
+
+  const quickOpts = getApplicableOptions();
+  const quickOptsHtml = quickOpts.map(o => {
+    const priceLabel = o.percent ? `+${o.percent}%` : `+${o.price} €`;
+    return `<div class="quick-chip ${state.options.has(o.key)?'selected':''}" data-key="${o.key}">${o.label} <span class="quick-chip-price">${priceLabel}</span></div>`;
+  }).join('');
+
+  stage.innerHTML = `
+    <div class="final-hero">
+      <div class="final-label">Estimation (usage interne)</div>
+      <div class="final-price">${fmt(r.low)} – ${fmt(r.high)} €</div>
+      <div class="final-sub">Calcul automatique, ±15% — à toi d'ajuster selon le brief réel</div>
+      <div class="final-sub">Net estimé après charges (~${Math.round(URSSAF_RATE*100)}% URSSAF) : ${fmt(netLow)} – ${fmt(netHigh)} €</div>
+      ${effectiveRate !== null ? `<div class="tjm-badge ${belowFloor ? 'tjm-low' : ''}">≈ ${effectiveRate} €/h effectif ${belowFloor ? '· sous ton plancher de ' + MIN_HOURLY_FLOOR + '€/h' : ''}</div>` : ''}
+    </div>
+
+    <div class="evan-note">
+      💬 Annonce plutôt <strong>${fmt(r.high)} €</strong>, tu as de la marge jusqu'à <strong>${fmt(r.low)} €</strong> si besoin de négocier.
+    </div>
+
+    ${quickOpts.length > 0 ? `
+    <div class="recap-box">
+      <div class="recap-title">⚡ Bascule rapide (options)</div>
+      <div class="quick-toggle-grid">${quickOptsHtml}</div>
+    </div>` : ''}
+
+    <div class="recap-box">
+      <div class="recap-title">📋 Récap du projet</div>
+      ${recapHtml}
+    </div>
+
+    <div class="recap-box">
+      <div class="recap-title">🧮 Détail du calcul</div>
+      <div class="d-row"><span>${baseLabel}</span><span>${fmt(r.base)} €</span></div>
+      ${showExtraRow ? `<div class="d-row"><span>${extraLabel}</span><span>${fmt(r.extra)} €</span></div>` : ''}
+      ${r.positioningObj ? `<div class="d-row"><span>Coefficient positionnement</span><span>x${r.positioningObj.mult.toFixed(2)}</span></div>` : ''}
+      <div class="d-row"><span>Coefficient usage</span><span>x${r.usageObj.mult.toFixed(2)}</span></div>
+      <div class="d-row"><span>Options</span><span>${r.optionsTotal > 0 ? fmt(r.optionsTotal) + ' €' : 'Aucune'}${r.rush ? ' + urgence' : ''}</span></div>
+    </div>
+
+    <div class="field">
+      <label for="noteInput">Note (contexte prospect)</label>
+      <textarea class="text-input note-textarea" id="noteInput" placeholder="Ex : @pseudo_instagram, veut livraison sous 2 semaines...">${state.note}</textarea>
+    </div>
+
+    <button type="button" class="btn-primary" id="copyBtn">📋 Copier le récap</button>
+    <div class="restart-link" id="restartLink">Nouvelle estimation</div>
+  `;
+
+  stage.querySelectorAll('.quick-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const key = chip.dataset.key;
+      if(state.options.has(key)){ state.options.delete(key); }
+      else { state.options.add(key); }
+      renderFinal(); // recalcule et réaffiche tout l'écran avec le nouveau prix
+    });
+  });
+
+  document.getElementById('noteInput').addEventListener('input', (e) => { state.note = e.target.value; });
+
+  const copyBtn = document.getElementById('copyBtn');
+  copyBtn.addEventListener('click', () => {
+    const copyText = buildCopyText(r, recapItems);
+    navigator.clipboard.writeText(copyText).then(() => {
+      const original = copyBtn.textContent;
+      copyBtn.textContent = '✓ Copié !';
+      setTimeout(() => { copyBtn.textContent = original; }, 1500);
+    });
+  });
+
+  document.getElementById('restartLink').addEventListener('click', () => {
+    state = freshState();
+    historyStack = [];
+    currentStep = 'mode';
+    render();
+  });
+}
+
+/* ============================================================
+   ACCÈS RESTREINT
+   ============================================================ */
+// Le mot de passe n'est jamais stocké en clair : seule son empreinte SHA-256 est comparée.
+// Protection côté client uniquement — dissuasive pour un visiteur lambda, pas infranchissable
+// pour quelqu'un de déterminé à lire le code source.
+const GATE_HASH = '64db96ee83e277dfdec3f666c1d4be35254d0631609feeffe173d8c322957bc3';
+const GATE_SESSION_KEY = 'ev_outil_interne_unlocked';
+
+async function sha256Hex(text){
+  const data = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function unlockApp(){
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('appRoot').style.display = 'flex';
+  render();
+}
+
+async function attemptUnlock(){
+  const input = document.getElementById('gatePassword');
+  const errorBox = document.getElementById('gateError');
+  const hash = await sha256Hex(input.value);
+  if(hash === GATE_HASH){
+    sessionStorage.setItem(GATE_SESSION_KEY, '1');
+    unlockApp();
+  } else {
+    errorBox.style.display = 'block';
+    input.value = '';
+    input.focus();
+  }
+}
+
+document.getElementById('gateSubmit').addEventListener('click', attemptUnlock);
+document.getElementById('gatePassword').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') attemptUnlock();
+});
+
+if(sessionStorage.getItem(GATE_SESSION_KEY) === '1'){
+  unlockApp();
+} else {
+  document.getElementById('gatePassword').focus();
+}
+
+</script>
+
+</body>
+</html>
