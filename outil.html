@@ -961,11 +961,34 @@ function parseRecapText(text){
   const cfg = MODE_CONFIG[mode];
   const opts = mode === 'video' ? VIDEO_OPTIONS : PHOTO_OPTIONS;
 
-  function getLine(label){
-    const re = new RegExp('-\\s*' + label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*:\\s*(.+)', 'i');
-    const m = text.match(re);
-    return m ? m[1].trim() : null;
+  // Découpage robuste : on repère chaque "- Label :" connu comme point de coupure,
+  // qu'il y ait des retours à la ligne ou que tout soit collé sur une seule ligne
+  // (ex : message copié depuis WhatsApp qui aplatit parfois les sauts de ligne).
+  const ALL_LABELS = [
+    'Prestation', 'Type de projet', 'Positionnement', "Secteur d'activité",
+    'Description du projet', 'Volume de rushs', 'Durée',
+    'Livrables souhaités', 'Photos retouchées', 'Usage prévu', 'Options',
+  ];
+  function escapeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+  const labelPattern = ALL_LABELS.map(escapeRe).join('|');
+  const splitRe = new RegExp('-\\s*(' + labelPattern + ')\\s*:\\s*', 'g');
+
+  const matches = [];
+  let m;
+  while((m = splitRe.exec(text)) !== null){
+    matches.push({ label: m[1], start: m.index, valueStart: m.index + m[0].length });
   }
+
+  const fields = {};
+  for(let i = 0; i < matches.length; i++){
+    const cur = matches[i];
+    const nextStart = i + 1 < matches.length ? matches[i+1].start : text.length;
+    let value = text.slice(cur.valueStart, nextStart);
+    // coupe le boilerplate final ("Merci de me recontacter...", le repère interne entre crochets)
+    value = value.split(/\s*Merci de me recontacter|\s*\[Repère interne/)[0];
+    fields[cur.label] = value.trim();
+  }
+  function getLine(label){ return fields[label] || null; }
 
   const newState = freshState();
   newState.mode = mode;
