@@ -314,6 +314,13 @@ html, body{
   outline: none;
   border-color: var(--accent);
 }
+.note-textarea{
+  min-height: 90px;
+  resize: vertical;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.4;
+  padding-top: 13px;
+}
 .duration-convert{
   text-align:center;
   font-size: 13px;
@@ -667,6 +674,7 @@ function freshState(){
     type: null,
     positioning: 'pme',
     sector: '',
+    otherDetails: '',
     hours: 8, // 8h = 1 jour de tournage/séance par défaut
     count: 1,
     usage: null,
@@ -677,7 +685,7 @@ let state = freshState();
 let currentStep = 'mode';
 let historyStack = [];
 
-const STEP_ORDER = ['mode','service','type','positioning','sector','duration','count','usage','options','final'];
+const STEP_ORDER = ['mode','service','type','otherDetails','positioning','sector','duration','count','usage','options','final'];
 
 function formatDuration(hours){
   const days = Math.floor(hours / 8);
@@ -732,6 +740,7 @@ function render(){
     case 'mode': renderMode(); break;
     case 'service': renderService(); break;
     case 'type': renderType(); break;
+    case 'otherDetails': renderOtherDetails(); break;
     case 'positioning': renderPositioning(); break;
     case 'sector': renderSector(); break;
     case 'duration': renderDuration(); break;
@@ -826,12 +835,36 @@ function renderType(){
   stage.querySelectorAll('.choice-card').forEach(card => {
     card.addEventListener('click', () => {
       state.type = card.dataset.value;
-      if(typeNeedsPositioning(state.mode, state.type)){
+      if(state.type === 'other'){
+        goTo('otherDetails');
+      } else if(typeNeedsPositioning(state.mode, state.type)){
         goTo('positioning');
       } else {
         goToAfterPositioning();
       }
     });
+  });
+}
+
+/* ============================================================
+   STEP: OTHER DETAILS (uniquement pour "Autre projet / sur-mesure")
+   ============================================================ */
+
+function renderOtherDetails(){
+  stage.innerHTML = `
+    <h2 class="question">Décris ton projet</h2>
+    <p class="question-sub">Quelques mots suffisent pour que je comprenne ce que tu as en tête.</p>
+    <textarea class="text-input note-textarea" id="otherDetailsInput" placeholder="Ex : vidéo de recrutement pour mon équipe, teaser pour un événement sportif...">${state.otherDetails}</textarea>
+    <button type="button" class="btn-primary" id="nextBtn">Suivant</button>
+  `;
+  const input = document.getElementById('otherDetailsInput');
+  input.addEventListener('input', () => { state.otherDetails = input.value; });
+  document.getElementById('nextBtn').addEventListener('click', () => {
+    if(typeNeedsPositioning(state.mode, state.type)){
+      goTo('positioning');
+    } else {
+      goToAfterPositioning();
+    }
   });
 }
 
@@ -1073,6 +1106,9 @@ function buildRecapItems(r){
     { label: 'Prestation', value: serviceLabel },
     { label: 'Type de projet', value: r.proj.label },
   ];
+  if(state.type === 'other' && state.otherDetails.trim()){
+    items.push({ label: 'Description du projet', value: state.otherDetails.trim() });
+  }
   if(r.positioningObj){
     items.push({ label: 'Positionnement', value: r.positioningObj.label });
   }
@@ -1101,9 +1137,7 @@ function buildWaMessage(r){
 Voici les infos de mon projet ${isVideo ? 'vidéo' : 'photo'} :
 ${lines}
 
-Merci de me recontacter avec un devis.
-
-[Repère interne, non communiqué au client : ${fmt(r.low)} € – ${fmt(r.high)} €]`
+Merci de me recontacter avec un devis.`
   );
 }
 
