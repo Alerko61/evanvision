@@ -907,9 +907,21 @@ function primeHeroVideo(video, url) {
   video.play().catch(() => {});
 }
 
-function renderHeroVideos(urls) {
+// Vidéos à repousser en fin de boucle du fond du hero (ordre différent de "Mes prestations")
+const HERO_VIDEO_PUSH_TO_END = [
+  "https://framerusercontent.com/assets/q3cG9dFtdoMBHgI3nvDDIsgIZzE.mp4"
+];
+
+function orderHeroVideos(urls) {
+  const front = urls.filter(u => !HERO_VIDEO_PUSH_TO_END.includes(u));
+  const back = HERO_VIDEO_PUSH_TO_END.filter(u => urls.includes(u));
+  return front.concat(back);
+}
+
+function renderHeroVideos(rawUrls) {
   const bg = document.getElementById('heroVideoBg');
-  if (!bg || !urls || !urls.length) return;
+  if (!bg || !rawUrls || !rawUrls.length) return;
+  const urls = orderHeroVideos(rawUrls);
   bg.innerHTML = '';
   if (heroVideoTimer) { clearInterval(heroVideoTimer); heroVideoTimer = null; }
 
