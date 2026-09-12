@@ -66,12 +66,11 @@ nav.scrolled{background:rgba(6,6,8,0.88);box-shadow:0 1px 40px rgba(0,0,0,0.4)}
 .hero-enter-1{animation-delay:0.2s}.hero-enter-2{animation-delay:0.5s}
 @keyframes heroIn{to{opacity:1;transform:translateY(0)}}
 
-#trust{padding:50px 0;overflow:hidden}
+#trust{padding:50px 0}
 .trust-inner{max-width:1100px;margin:0 auto;padding:0 40px}
-.marquee-wrap{position:relative;width:100%;overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 8%,black 92%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,black 8%,black 92%,transparent)}
-.marquee-track{display:flex;align-items:center;gap:80px;width:max-content;animation:marquee 60s linear infinite}
-.marquee-track img{height:90px;width:auto;object-fit:contain;opacity:0.8}
-@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.trust-logos{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:56px;max-width:1000px;margin:0 auto;padding:0 40px}
+.trust-logos img{height:90px;width:auto;object-fit:contain;opacity:0.8;transition:opacity 0.3s,transform 0.3s}
+.trust-logos img:hover{opacity:1;transform:translateY(-2px)}
 
 .about-header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
 .about-name{font-weight:700;font-size:1.05rem}.about-role{font-size:0.78rem;color:var(--gray2)}
@@ -253,35 +252,13 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
 <!-- ===== TRUST MARQUEE ===== -->
 <section id="trust">
   <div class="trust-inner">
-    <div class="sec-tag reveal">✦ Ils me font confiance.</div>
+    <div class="sec-tag reveal" style="text-align:center;display:flex;justify-content:center">✦ Ils me font confiance.</div>
   </div>
-  <div class="marquee-wrap">
-    <div class="marquee-track">
-      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
-      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
-      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
-      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
-      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
-      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
-      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
-      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
-      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
-      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
-      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
-      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
-      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
-      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
-      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
-      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
-      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
-      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
-      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
-      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
-      <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
-      <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
-      <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
-      <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
-    </div>
+  <div class="trust-logos reveal">
+    <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
+    <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
+    <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
+    <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
   </div>
 </section>
 
@@ -716,24 +693,22 @@ function updateLogoSize(val) {
       if (img) img.style.height = val + 'px';
     }
   }
-  document.querySelectorAll('.marquee-track img').forEach(img => {
+  document.querySelectorAll('.trust-logos img').forEach(img => {
     img.style.height = val + 'px';
   });
 }
 
 function renderSiteLogos(urls, sizes) {
-  const track = document.querySelector('.marquee-track');
+  const track = document.querySelector('.trust-logos');
   track.innerHTML = '';
-  for (let r = 0; r < 6; r++) {
-    urls.forEach((url, i) => {
-      const img = document.createElement('img');
-      img.src = url;
-      img.alt = 'Client Evan Visions';
-      const s = Array.isArray(sizes) ? (sizes[i] || 90) : (sizes || 90);
-      img.style.height = s + 'px';
-      track.appendChild(img);
-    });
-  }
+  urls.forEach((url, i) => {
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = 'Client Evan Visions';
+    const s = Array.isArray(sizes) ? (sizes[i] || 90) : (sizes || 90);
+    img.style.height = s + 'px';
+    track.appendChild(img);
+  });
 }
 
 function loadLogos() {
