@@ -888,14 +888,19 @@ function renderSiteVideos(urls) {
 }
 
 // Fond vidéo du hero : défile parmi les vidéos de "Mes prestations", 5s par vidéo, avec fondu enchaîné
-// Chaque vidéo démarre à 5 secondes (évite les textes/accroches en début de clip)
+// Chaque vidéo démarre à 5 secondes par défaut (évite les textes/accroches en début de clip)
 const HERO_VIDEO_START = 5;
+// Décalages spécifiques par vidéo (en secondes), ajoutés au démarrage par défaut ci-dessus
+const HERO_VIDEO_START_OVERRIDES = {
+  "https://framerusercontent.com/assets/6zy3fAJpudISQNJQLTGaZXMCIEc.mp4": 15
+};
 let heroVideoTimer = null;
 
 function primeHeroVideo(video, url) {
   video.src = url;
+  const startAt = HERO_VIDEO_START_OVERRIDES[url] !== undefined ? HERO_VIDEO_START_OVERRIDES[url] : HERO_VIDEO_START;
   const onMeta = () => {
-    try { video.currentTime = HERO_VIDEO_START; } catch (e) {}
+    try { video.currentTime = startAt; } catch (e) {}
     video.removeEventListener('loadedmetadata', onMeta);
   };
   video.addEventListener('loadedmetadata', onMeta);
