@@ -892,7 +892,8 @@ function renderSiteVideos(urls) {
 const HERO_VIDEO_START = 5;
 // Décalages spécifiques par vidéo (en secondes), ajoutés au démarrage par défaut ci-dessus
 const HERO_VIDEO_START_OVERRIDES = {
-  "https://framerusercontent.com/assets/6zy3fAJpudISQNJQLTGaZXMCIEc.mp4": 17.5
+  "https://framerusercontent.com/assets/6zy3fAJpudISQNJQLTGaZXMCIEc.mp4": 17.5,
+  "https://framerusercontent.com/assets/bOEFxCYuTLBP1FTLRhqYbBT46M.mp4": 11.5
 };
 let heroVideoTimer = null;
 
@@ -907,15 +908,31 @@ function primeHeroVideo(video, url) {
   video.play().catch(() => {});
 }
 
-// Vidéos à repousser en fin de boucle du fond du hero (ordre différent de "Mes prestations")
+// Vidéos ajoutées uniquement à la boucle du fond du hero (n'apparaissent pas dans "Mes prestations")
+const HERO_EXTRA_VIDEOS = [
+  "https://framerusercontent.com/assets/bOEFxCYuTLBP1FTLRhqYbBT46M.mp4"
+];
+
+// Vidéos forcées en tête de la boucle du fond du hero
+const HERO_VIDEO_PUSH_TO_FRONT = [
+  "https://framerusercontent.com/assets/bOEFxCYuTLBP1FTLRhqYbBT46M.mp4"
+];
+
+// Vidéos repoussées en fin de boucle du fond du hero (ordre différent de "Mes prestations")
 const HERO_VIDEO_PUSH_TO_END = [
   "https://framerusercontent.com/assets/q3cG9dFtdoMBHgI3nvDDIsgIZzE.mp4"
 ];
 
-function orderHeroVideos(urls) {
-  const front = urls.filter(u => !HERO_VIDEO_PUSH_TO_END.includes(u));
-  const back = HERO_VIDEO_PUSH_TO_END.filter(u => urls.includes(u));
-  return front.concat(back);
+function orderHeroVideos(rawUrls) {
+  const combined = [];
+  HERO_EXTRA_VIDEOS.forEach(u => { if (!combined.includes(u)) combined.push(u); });
+  rawUrls.forEach(u => { if (!combined.includes(u)) combined.push(u); });
+
+  const front = HERO_VIDEO_PUSH_TO_FRONT.filter(u => combined.includes(u));
+  const back = HERO_VIDEO_PUSH_TO_END.filter(u => combined.includes(u));
+  const middle = combined.filter(u => !front.includes(u) && !back.includes(u));
+
+  return front.concat(middle, back);
 }
 
 function renderHeroVideos(rawUrls) {
