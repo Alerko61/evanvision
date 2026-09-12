@@ -54,7 +54,13 @@ nav.scrolled{background:rgba(6,6,8,0.88);box-shadow:0 1px 40px rgba(0,0,0,0.4)}
 .gold{color:var(--accent)}.italic{color:var(--accent2)}
 
 #hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;padding:120px 40px 80px;overflow:hidden}
-.hero-title{font-size:clamp(1.6rem,4.5vw,2.8rem);font-weight:800;line-height:1.15;letter-spacing:-0.02em;margin-bottom:28px;text-transform:uppercase;max-width:700px}
+.hero-video-bg{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;gap:2px;z-index:0}
+.hero-video-bg video{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(0.75) brightness(0.85)}
+.hero-overlay{position:absolute;inset:0;z-index:1;background:
+    radial-gradient(ellipse 70% 55% at 50% 45%,rgba(6,6,8,0.55) 0%,rgba(6,6,8,0.82) 65%,rgba(6,6,8,0.94) 100%),
+    linear-gradient(180deg,rgba(6,6,8,0.75) 0%,rgba(6,6,8,0.35) 30%,rgba(6,6,8,0.35) 70%,rgba(6,6,8,0.85) 100%)}
+#hero > .hero-title,#hero > .hero-enter-2{position:relative;z-index:2}
+.hero-title{font-size:clamp(1.6rem,4.5vw,2.8rem);font-weight:800;line-height:1.15;letter-spacing:-0.02em;margin-bottom:28px;text-transform:uppercase;max-width:700px;text-shadow:0 4px 30px rgba(0,0,0,0.5)}
 .hero-enter{opacity:0;transform:translateY(30px);animation:heroIn 0.9s cubic-bezier(0.16,1,0.3,1) forwards}
 .hero-enter-1{animation-delay:0.2s}.hero-enter-2{animation-delay:0.5s}
 @keyframes heroIn{to{opacity:1;transform:translateY(0)}}
@@ -140,6 +146,7 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
   .ally-card{grid-template-columns:1fr}.ally-img{min-height:240px}.ally-content{padding:30px 24px}
   .presta-grid{grid-template-columns:1fr}.svc-grid{grid-template-columns:1fr}
   .cta-card{padding:50px 24px}
+  .hero-video-bg{grid-template-columns:repeat(2,1fr)}
 }
 /* ===== ADMIN DASHBOARD ===== */
 .admin-overlay{position:fixed;inset:0;z-index:99999;background:rgba(6,6,8,0.95);backdrop-filter:blur(30px);display:none;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s}
@@ -215,6 +222,8 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
 
 <!-- ===== HERO ===== -->
 <section id="hero">
+  <div class="hero-video-bg" id="heroVideoBg"></div>
+  <div class="hero-overlay"></div>
   <h1 class="hero-title hero-enter hero-enter-1">Votre marque mérite une vidéo <span class="gold" style="font-style:normal">performante</span><span style="color:var(--white)">.</span></h1>
   <div class="hero-enter hero-enter-2">
     <a href="devis.html" target="_blank" class="btn btn-fill btn-full reveal" style="max-width:600px;margin:20px auto 0;display:block;text-align:center">DEMANDE TON DEVIS GRATUIT →</a>
@@ -906,6 +915,26 @@ function renderSiteVideos(urls) {
     }, { threshold: 0.2 });
     vObs.observe(card);
   });
+  renderHeroVideos(urls);
+}
+
+// Fond vidéo du hero : réutilise les mêmes vidéos que "Mes prestations"
+function renderHeroVideos(urls) {
+  const bg = document.getElementById('heroVideoBg');
+  if (!bg || !urls || !urls.length) return;
+  bg.innerHTML = '';
+  const tileCount = 8;
+  for (let i = 0; i < tileCount; i++) {
+    const url = urls[i % urls.length];
+    const v = document.createElement('video');
+    v.src = url;
+    v.autoplay = true;
+    v.muted = true;
+    v.loop = true;
+    v.playsInline = true;
+    bg.appendChild(v);
+    v.play().catch(() => {});
+  }
 }
 
 // ============================================
