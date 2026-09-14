@@ -28,7 +28,7 @@
   --font:'Questrial','Century Gothic','CenturyGothic','AppleGothic','Futura',sans-serif;
 }
 html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
-body{background:var(--bg);color:var(--white);font-family:var(--font);overflow-x:hidden;line-height:1.6}
+body{background:var(--bg);color:var(--white);font-family:var(--font);overflow-x:hidden;line-height:1.6;-webkit-tap-highlight-color:transparent}
 body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.018'/%3E%3C/svg%3E");pointer-events:none;z-index:10000}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
 
@@ -146,9 +146,23 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
   .nav-center.open{display:flex;flex-direction:column;position:absolute;top:100%;left:0;right:0;background:rgba(6,6,8,0.95);backdrop-filter:blur(30px);padding:24px;border-bottom:1px solid var(--border);gap:14px}
   .section,.cta-section{padding-left:20px;padding-right:20px}
   .trust-inner{padding:0 20px}
+  .trust-logos{padding:0 20px;gap:36px}
   .ally-card{grid-template-columns:1fr}.ally-img{min-height:240px}.ally-content{padding:30px 24px}
   .presta-grid{grid-template-columns:1fr}.svc-grid{grid-template-columns:1fr}
   .cta-card{padding:50px 24px}
+  #hero{padding:100px 24px 60px}
+}
+@media(max-width:480px){
+  .section,.cta-section{padding-left:16px;padding-right:16px}
+  #hero{padding:90px 18px 50px}
+  .hero-title{font-size:1.5rem;margin-bottom:22px}
+  .sec-title{font-size:1.6rem}
+  .ally-content{padding:24px 18px}
+  .cta-card{padding:36px 18px}
+  .cta-title{font-size:1.25rem}
+  footer{padding:28px 20px}
+  .admin-panel{padding:24px 18px;width:94%}
+  .avis-card{flex:0 0 280px}
 }
 /* ===== ADMIN DASHBOARD ===== */
 .admin-overlay{position:fixed;inset:0;z-index:99999;background:rgba(6,6,8,0.95);backdrop-filter:blur(30px);display:none;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s}
@@ -258,10 +272,10 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
     <div class="sec-tag reveal" style="text-align:center;display:flex;justify-content:center">✦ Ils me font confiance.</div>
   </div>
   <div class="trust-logos reveal">
-    <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client">
-    <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon">
-    <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon">
-    <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise">
+    <img src="https://framerusercontent.com/images/lAkfIC13Ue9AOoXOCSD5ZymG2yE.png?width=972&height=540" alt="Vidéaste Lyon client" loading="lazy">
+    <img src="https://framerusercontent.com/images/GQYf6TNE4DA2pLfX9xEY0xUYHo.png?scale-down-to=512&width=1920&height=1920" alt="Production vidéo Lyon" loading="lazy">
+    <img src="https://framerusercontent.com/images/bAhk6GO7vbVCqtmaYoka9Vmf8Gs.png?scale-down-to=512&width=1920&height=1920" alt="Film corporate Lyon" loading="lazy">
+    <img src="https://framerusercontent.com/images/ZKkpQ3FoSVqx9bFpsjR9sLe9vE.svg?width=304&height=104" alt="Création vidéo entreprise" loading="lazy">
   </div>
 </section>
 
@@ -282,7 +296,7 @@ footer span{font-size:0.75rem;color:var(--gray3)}footer a{color:var(--gray3);tex
 <section id="ally-creatif" class="section">
   <!-- ALLY -->
   <div class="ally-card reveal-scale">
-    <img src="https://framerusercontent.com/images/h3LRsOezrZo6EzTTpAvKAHxVMFo.png?scale-down-to=1024&width=1030&height=568" alt="Evan Visions créatif" class="ally-img">
+    <img src="https://framerusercontent.com/images/h3LRsOezrZo6EzTTpAvKAHxVMFo.png?scale-down-to=1024&width=1030&height=568" alt="Evan Visions créatif" class="ally-img" loading="lazy">
     <div class="ally-content">
       <h3>Votre allié <span class="gold">créatif.</span></h3>
       <div class="ally-underline"></div>
@@ -713,6 +727,7 @@ function renderSiteLogos(urls, sizes) {
     const img = document.createElement('img');
     img.src = url;
     img.alt = 'Client Evan Visions';
+    img.loading = 'lazy';
     const s = Array.isArray(sizes) ? (sizes[i] || 90) : (sizes || 90);
     img.style.height = s + 'px';
     track.appendChild(img);
@@ -880,15 +895,17 @@ function renderSiteVideos(urls) {
   urls.forEach((url, i) => {
     const card = document.createElement('div');
     card.className = 'presta-card reveal rd' + ((i % 4) + 1);
-    card.innerHTML = `<video src="${url}" autoplay muted loop playsinline></video>`;
+    card.innerHTML = `<video src="${url}" autoplay muted playsinline webkit-playsinline loop preload="metadata"></video>`;
     grid.appendChild(card);
     // Trigger reveal
     obs.observe(card);
-    // Autoplay
+    // Autoplay (avec retry si le navigateur bloque le premier essai)
     const v = card.querySelector('video');
-    v.play().catch(() => {});
+    v.muted = true;
+    v.defaultMuted = true;
+    attemptHeroPlay(v);
     const vObs = new IntersectionObserver(e => {
-      e.forEach(en => { if (en.isIntersecting) v.play().catch(() => {}); });
+      e.forEach(en => { if (en.isIntersecting) attemptHeroPlay(v); });
     }, { threshold: 0.2 });
     vObs.observe(card);
   });
@@ -913,8 +930,44 @@ function primeHeroVideo(video, url) {
     video.removeEventListener('loadedmetadata', onMeta);
   };
   video.addEventListener('loadedmetadata', onMeta);
-  video.play().catch(() => {});
+  attemptHeroPlay(video);
 }
+
+// Autoplay mobile fiable : certains navigateurs (Safari/Chrome iOS) exigent l'attribut
+// HTML "muted"/"playsinline" (pas seulement la propriété JS) avant de jouer la vidéo.
+function setupHeroVideoEl(v) {
+  v.muted = true;
+  v.defaultMuted = true;
+  v.loop = true;
+  v.playsInline = true;
+  v.autoplay = true;
+  v.setAttribute('muted', '');
+  v.setAttribute('playsinline', '');
+  v.setAttribute('webkit-playsinline', '');
+  v.setAttribute('autoplay', '');
+  v.preload = 'auto';
+  v.disablePictureInPicture = true;
+  return v;
+}
+
+function attemptHeroPlay(video) {
+  const p = video.play();
+  if (p && typeof p.catch === 'function') {
+    p.catch(() => {
+      // Réessaie une fois les données prêtes (utile sur réseau mobile lent)
+      video.addEventListener('canplay', () => video.play().catch(() => {}), { once: true });
+    });
+  }
+}
+
+// Filet de sécurité : sur certains mobiles, le premier autoplay est bloqué tant qu'aucune
+// interaction n'a eu lieu sur la page — on relance la lecture dès le premier tap/scroll.
+function heroVideoInteractionFallback() {
+  document.querySelectorAll('.hero-video-bg video').forEach(v => v.play().catch(() => {}));
+}
+['touchstart', 'click', 'scroll'].forEach(evt => {
+  document.addEventListener(evt, heroVideoInteractionFallback, { once: true, passive: true });
+});
 
 // Vidéos ajoutées uniquement à la boucle du fond du hero (n'apparaissent pas dans "Mes prestations")
 const HERO_EXTRA_VIDEOS = [
@@ -952,7 +1005,7 @@ function renderHeroVideos(rawUrls) {
 
   const vA = document.createElement('video');
   const vB = document.createElement('video');
-  [vA, vB].forEach(v => { v.autoplay = true; v.muted = true; v.loop = true; v.playsInline = true; });
+  [vA, vB].forEach(setupHeroVideoEl);
   bg.appendChild(vA);
   bg.appendChild(vB);
 
