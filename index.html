@@ -739,14 +739,25 @@ function loadLogos() {
     renderSiteLogos(DEFAULT_LOGOS, 90);
     return;
   }
+  let settled = false;
+  const timeout = setTimeout(() => {
+    if (!settled) { settled = true; renderSiteLogos(DEFAULT_LOGOS, 90); }
+  }, 2500);
+
   db.ref('logos').once('value').then(snap => {
+    clearTimeout(timeout);
     const data = snap.val();
     if (data && data.urls && data.urls.length) {
+      settled = true;
       renderSiteLogos(data.urls, data.sizes || 90);
-    } else {
+    } else if (!settled) {
+      settled = true;
       renderSiteLogos(DEFAULT_LOGOS, 90);
     }
-  }).catch(() => renderSiteLogos(DEFAULT_LOGOS, 90));
+  }).catch(() => {
+    clearTimeout(timeout);
+    if (!settled) { settled = true; renderSiteLogos(DEFAULT_LOGOS, 90); }
+  });
 }
 
 // ============================================
@@ -861,14 +872,25 @@ function loadReviews() {
     renderSiteReviews(DEFAULT_REVIEWS);
     return;
   }
+  let settled = false;
+  const timeout = setTimeout(() => {
+    if (!settled) { settled = true; renderSiteReviews(DEFAULT_REVIEWS); }
+  }, 2500);
+
   db.ref('reviews').once('value').then(snap => {
+    clearTimeout(timeout);
     const data = snap.val();
     if (data && data.length) {
+      settled = true;
       renderSiteReviews(data);
-    } else {
+    } else if (!settled) {
+      settled = true;
       renderSiteReviews(DEFAULT_REVIEWS);
     }
-  }).catch(() => renderSiteReviews(DEFAULT_REVIEWS));
+  }).catch(() => {
+    clearTimeout(timeout);
+    if (!settled) { settled = true; renderSiteReviews(DEFAULT_REVIEWS); }
+  });
 }
 
 // ============================================
@@ -879,14 +901,27 @@ function loadVideos() {
     renderSiteVideos(DEFAULT_VIDEOS);
     return;
   }
+  let settled = false;
+  // Filet de sécurité : sur réseau mobile lent/bloqué, Firebase peut ne jamais répondre.
+  // On n'attend pas indéfiniment avant d'afficher les vidéos.
+  const timeout = setTimeout(() => {
+    if (!settled) { settled = true; renderSiteVideos(DEFAULT_VIDEOS); }
+  }, 2500);
+
   db.ref('videos').once('value').then(snap => {
+    clearTimeout(timeout);
     const data = snap.val();
     if (data && data.urls && data.urls.length) {
+      settled = true;
       renderSiteVideos(data.urls);
-    } else {
+    } else if (!settled) {
+      settled = true;
       renderSiteVideos(DEFAULT_VIDEOS);
     }
-  }).catch(() => renderSiteVideos(DEFAULT_VIDEOS));
+  }).catch(() => {
+    clearTimeout(timeout);
+    if (!settled) { settled = true; renderSiteVideos(DEFAULT_VIDEOS); }
+  });
 }
 
 function renderSiteVideos(urls) {
